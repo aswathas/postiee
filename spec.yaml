@@ -1,0 +1,291 @@
+openapi: 3.0.3
+info:
+  title: LinkedIn Member Posting API
+  version: "1.0.0"
+  description: |
+    Self-serve LinkedIn posting surface for a personal developer app.
+
+    Scope of this spec is deliberately limited to what the "Share on LinkedIn"
+    product grants a self-serve app (scope `w_member_social`): create a post as
+    the authenticated member, and delete one. Nothing else.
+
+    NOT INCLUDED, because the API does not grant it at any self-serve tier:
+    comments, reactions, analytics, reading your own posts (`r_member_social`
+    is a closed permission), messaging, connection invitations, third-party
+    profile reads. Commands for those must never appear in `--help`; a command
+    that 403s on first use is worse than an absent one.
+
+    Two create endpoints are modelled because LinkedIn's own docs disagree:
+    `/v2/ugcPosts` is the endpoint the Share-on-LinkedIn product documents
+    against, but the Posts API doc states it "replaces the ugcPosts API". The
+    client tries `/v2/ugcPosts` first and falls back to `/rest/posts`.
+servers:
+  - url: https://api.linkedin.com
+    description: LinkedIn REST API
+
+security:
+  - memberOAuth:
+      - w_member_social
+
+paths:
+  /v2/userinfo:
+    get:
+      operationId: getCurrentMember
+      summary: Resolve the authenticated member's own person ID
+      description: |
+        Returns `sub`, the app-scoped member identifier. Person IDs are unique
+        per application, so this MUST be called at runtime to build the author
+        URN. Never hardcode a person ID.
+      security:
+        - memberOAuth: [openid, profile]
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OIDC claims for the authenticated member
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sub: { type: string, description: App-scoped member id }
+                  name: { type: string }
+                  given_name: { type: string }
+                  family_name: { type: string }
+                  email: { type: string }
+                  email_verified: { type: boolean }
+                  picture: { type: string }
+                  locale: { type: string }
+                required: [sub]
+        "401":
+          description: Token missing, expired, or lacking the required scope
+
+  # NOTE: the legacy POST /v2/ugcPosts endpoint is deliberately NOT modelled.
+  # Its `com.linkedin.ugc.ShareContent` envelope uses dotted keys that flatten
+  # to >64-char MCP tool property names, which fail the tool schema at load and
+  # brick the calling agent session. The extension that would fix it
+  # (x-pp-param-url-names) was rejected by the generator in this shape. LinkedIn's
+  # own Posts doc states the Posts API "replaces the ugcPosts API", and that doc
+  # was last touched 2025-02-05. /rest/posts is the modern surface and is what
+  # ships. If a member app is found to be restricted there, revisit.
+
+  /rest/posts:
+    post:
+      operationId: createMemberPost
+      summary: Create a post (modern Community Management path)
+      description: |
+        Fallback for apps that hold Community Management access. `lifecycleState`
+        accepts PUBLISHED only at creation; DRAFT and PUBLISH_REQUESTED are
+        response-only. There is no publishAt or scheduledAt field anywhere in
+        the schema, so scheduling is client-side or impossible.
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema: { type: string }
+        - name: Linkedin-Version
+          in: header
+          required: true
+          schema: { type: string, example: "202609" }
+          description: |
+            YYYYMM. Monthly; each version supported >=12 months. 202510 sunsets
+            2026-10-15. Single constant in the client, never scattered.
+        - name: X-Restli-Protocol-Version
+          in: header
+          required: true
+          schema: { type: string, enum: ["2.0.0"] }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                author: { type: string, example: "urn:li:person:8675309" }
+                commentary: { type: string }
+                visibility:
+                  type: string
+                  enum: [CONNECTIONS, PUBLIC, LOGGED_IN, CONTAINER]
+                distribution:
+                  type: object
+                  description: Create-only required.
+                  properties:
+                    feedDistribution:
+                      type: string
+                      enum: [NONE, MAIN_FEED]
+                    targetEntities:
+                      type: array
+                      items: { type: object }
+                      description: OR of the targets. Omit for an untargeted post.
+                    thirdPartyDistributionChannels:
+                      type: array
+                      items: { type: object }
+                      description: Empty array means no external distribution.
+                  required: [feedDistribution]
+                lifecycleState: { type: string, enum: [PUBLISHED] }
+                isReshareDisabledByAuthor: { type: boolean, default: false }
+                content:
+                  type: object
+                  description: Omit entirely for a text-only post.
+                  properties:
+                    media:
+                      type: object
+                      properties:
+                        id: { type: string, example: "urn:li:image:C5610AQFj6TdYowm17w" }
+                        altText:
+                          type: string
+                          maxLength: 4086
+                          description: Recommended under 120 characters.
+                      required: [id]
+              required: [author, commentary, visibility, distribution, lifecycleState]
+              examples:
+                textOnly:
+                  value:
+                    author: "urn:li:person:8675309"
+                    commentary: "Hello from Postiee."
+                    visibility: PUBLIC
+                    distribution:
+                      feedDistribution: MAIN_FEED
+                      targetEntities: []
+                      thirdPartyDistributionChannels: []
+                    lifecycleState: PUBLISHED
+                    isReshareDisabledByAuthor: false
+      responses:
+        "201":
+          description: |
+            Created. The response BODY IS EMPTY. The post ID is in the
+            x-restli-id response header.
+          headers:
+            x-restli-id:
+              schema: { type: string }
+        "400": { description: Malformed body, or a sunset Linkedin-Version }
+        "403": { description: Missing scope }
+
+    delete:
+      operationId: deletePost
+      summary: Delete a post by urn
+      description: |
+        Idempotent. Returns 204 whether or not the post existed. Batch delete
+        is not supported. UNVERIFIED whether member-authored posts are
+        deletable with a self-serve app; the docs state no author restriction
+        but never confirm it for members.
+      parameters:
+        - name: postUrn
+          in: path
+          required: true
+          description: URL-encoded urn, e.g. urn%3Ali%3AugcPost%3A12345
+          schema: { type: string }
+        - name: Authorization
+          in: header
+          required: true
+          schema: { type: string }
+        - name: Linkedin-Version
+          in: header
+          required: true
+          schema: { type: string, example: "202609" }
+        - name: X-Restli-Protocol-Version
+          in: header
+          required: true
+          schema: { type: string, enum: ["2.0.0"] }
+      responses:
+        "204": { description: Deleted, or already absent. Idempotent. }
+        "403": { description: Missing scope }
+
+  /rest/images:
+    post:
+      operationId: initializeImageUpload
+      summary: Begin an image upload and receive the final image urn
+      description: |
+        Two steps only. There is NO finalizeUpload for images — that step
+        belongs to the Videos API. The `image` field in this response is
+        already the final urn; the only remaining work is the PUT of the bytes.
+        `SYNCHRONOUS_UPLOAD` is not supported. Constraints: JPG/GIF/PNG, under
+        36,152,320 pixels, GIF up to 250 frames.
+      parameters:
+        - name: action
+          in: query
+          required: true
+          schema: { type: string, enum: [initializeUpload] }
+        - name: Authorization
+          in: header
+          required: true
+          schema: { type: string }
+        - name: Linkedin-Version
+          in: header
+          required: true
+          schema: { type: string, example: "202609" }
+        - name: X-Restli-Protocol-Version
+          in: header
+          required: true
+          schema: { type: string, enum: ["2.0.0"] }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                initializeUploadRequest:
+                  type: object
+                  # mediaLibraryMetadata is omitted deliberately: its nested
+                  # associatedAccount/assetName fields expand to a 79-char MCP
+                  # tool parameter name, which is not a legal tool property key
+                  # and fails the schema at load. It only registers assets in a
+                  # sponsored media library, which a personal app has no use for.
+                  properties:
+                    owner:
+                      type: string
+                      example: "urn:li:person:8675309"
+                  required: [owner]
+              required: [initializeUploadRequest]
+      responses:
+        "200":
+          description: Upload URL and the final image urn.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: object
+                    properties:
+                      uploadUrlExpiresAt:
+                        type: integer
+                        format: int64
+                        description: Epoch millis. Do not cache past this.
+                      uploadUrl:
+                        type: string
+                        description: |
+                          Signed URL for the PUT. UNVERIFIED from current docs:
+                          the page detailing the upload call now 404s. Expected
+                          headers Authorization + binary body; expected 201.
+                      image:
+                        type: string
+                        description: Final urn, e.g. urn:li:image:C4E10AQFoyyAjHPMQuQ
+                required: [value]
+        "403": { description: Missing scope }
+
+components:
+  securitySchemes:
+    memberOAuth:
+      type: oauth2
+      description: |
+        3-legged OAuth. Authorization URL
+        https://www.linkedin.com/oauth/v2/authorization, token URL
+        https://www.linkedin.com/oauth/v2/accessToken.
+        `w_member_social` is self-serve via the Share on LinkedIn product.
+        `openid` + `profile` resolve the member's own id.
+        Access tokens last 60 days. Programmatic refresh is restricted to
+        approved Marketing Developer Platform partners, so re-running login is
+        the supported recovery path. No refresh flow should be generated.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://www.linkedin.com/oauth/v2/authorization
+          tokenUrl: https://www.linkedin.com/oauth/v2/accessToken
+          scopes:
+            w_member_social: Create a post on behalf of the authenticated member
+            openid: Resolve the member's own identity
+            profile: Read basic member profile fields

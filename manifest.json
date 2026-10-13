@@ -1,0 +1,39 @@
+{
+  "manifest_version": "0.3",
+  "name": "postiee-pp-mcp",
+  "display_name": "Linkedin Member Posting",
+  "version": "1.0.0",
+  "description": "Self-serve LinkedIn posting surface for a personal developer app.",
+  "author": {
+    "name": "CLI Printing Press"
+  },
+  "license": "Apache-2.0",
+  "server": {
+    "type": "binary",
+    "entry_point": "bin/postiee-pp-mcp",
+    "mcp_config": {
+      "command": "${__dirname}/bin/postiee-pp-mcp",
+      "args": [],
+      "env": {
+        "POSTIEE_MEMBER_OAUTH": "${user_config.postiee_member_oauth}"
+      }
+    }
+  },
+  "user_config": {
+    "postiee_member_oauth": {
+      "type": "string",
+      "title": "POSTIEE_MEMBER_OAUTH",
+      "description": "Sets POSTIEE_MEMBER_OAUTH for the Linkedin Member Posting MCP server. Get a credential from https://www.linkedin.com/oauth/v2/authorization.",
+      "sensitive": true,
+      "required": true
+    }
+  },
+  "compatibility": {
+    "claude_desktop": ">=1.0.0",
+    "platforms": [
+      "darwin",
+      "linux",
+      "win32"
+    ]
+  }
+}

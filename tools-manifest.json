@@ -1,0 +1,222 @@
+{
+  "api_name": "postiee",
+  "base_url": "https://api.linkedin.com",
+  "description": "Self-serve LinkedIn posting surface for a personal developer app.",
+  "mcp_ready": "full",
+  "http_transport": "standard",
+  "auth": {
+    "type": "bearer_token",
+    "header": "Authorization",
+    "env_vars": [
+      "POSTIEE_MEMBER_OAUTH"
+    ],
+    "env_var_specs": [
+      {
+        "name": "POSTIEE_MEMBER_OAUTH",
+        "kind": "per_call",
+        "required": true,
+        "sensitive": true,
+        "inferred": true
+      }
+    ],
+    "key_url": "https://www.linkedin.com/oauth/v2/authorization"
+  },
+  "required_headers": [],
+  "tools": [
+    {
+      "name": "images_initialize-upload",
+      "description": "Two steps only. There is NO finalizeUpload for images — that step belongs to the Videos API. The `image` field in this response is already the final urn; the only remaining work is the PUT of the bytes. `SYNCHRONOUS_UPLOAD` is not supported. Constraints: JPG/GIF/PNG, under 36,152,320 pixels, GIF up to 250 frames. Required: action, Authorization, Linkedin-Version, X-Restli-Protocol-Version, initializeUploadRequest. Returns the new ImagesInitializeUploadResponse.",
+      "method": "POST",
+      "path": "/rest/images",
+      "params": [
+        {
+          "name": "action",
+          "type": "string",
+          "location": "query",
+          "description": "Action",
+          "required": true
+        },
+        {
+          "name": "Authorization",
+          "type": "string",
+          "location": "header",
+          "description": "Authorization",
+          "required": true
+        },
+        {
+          "name": "Linkedin-Version",
+          "type": "string",
+          "location": "header",
+          "description": "Linkedin version",
+          "required": true
+        },
+        {
+          "name": "X-Restli-Protocol-Version",
+          "type": "string",
+          "location": "header",
+          "description": "X restli protocol version",
+          "required": true
+        },
+        {
+          "name": "initialize-upload-request-owner",
+          "wire_name": "initializeUploadRequest.owner",
+          "type": "string",
+          "location": "body",
+          "description": "Owner",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "posts_create-member",
+      "description": "Fallback for apps that hold Community Management access. `lifecycleState` accepts PUBLISHED only at creation; DRAFT and PUBLISH_REQUESTED are response-only. There is no publishAt or scheduledAt field anywhere in the schema, so scheduling is client-side or impossible. Required: Authorization, Linkedin-Version, X-Restli-Protocol-Version, author, commentary, distribution, lifecycleState, visibility. Optional: content, isReshareDisabledByAuthor (default: false).",
+      "method": "POST",
+      "path": "/rest/posts",
+      "params": [
+        {
+          "name": "Authorization",
+          "type": "string",
+          "location": "header",
+          "description": "Authorization",
+          "required": true
+        },
+        {
+          "name": "Linkedin-Version",
+          "type": "string",
+          "location": "header",
+          "description": "YYYYMM. Monthly; each version supported \u003e=12 months. 202510 sunsets 2026-10-15. Single constant in the client, never scattered.",
+          "required": true
+        },
+        {
+          "name": "X-Restli-Protocol-Version",
+          "type": "string",
+          "location": "header",
+          "description": "X restli protocol version",
+          "required": true
+        },
+        {
+          "name": "author",
+          "type": "string",
+          "location": "body",
+          "description": "Author",
+          "required": true
+        },
+        {
+          "name": "commentary",
+          "type": "string",
+          "location": "body",
+          "description": "Commentary",
+          "required": true
+        },
+        {
+          "name": "content-media-alt-text",
+          "wire_name": "content.media.altText",
+          "type": "string",
+          "location": "body",
+          "description": "Recommended under 120 characters."
+        },
+        {
+          "name": "content-media-id",
+          "wire_name": "content.media.id",
+          "type": "string",
+          "location": "body",
+          "description": "Id",
+          "required": true
+        },
+        {
+          "name": "distribution-feed-distribution",
+          "wire_name": "distribution.feedDistribution",
+          "type": "string",
+          "location": "body",
+          "description": "Feed distribution",
+          "required": true
+        },
+        {
+          "name": "distribution-target-entities",
+          "wire_name": "distribution.targetEntities",
+          "type": "array",
+          "location": "body",
+          "description": "OR of the targets. Omit for an untargeted post."
+        },
+        {
+          "name": "distribution-third-party-distribution-channels",
+          "wire_name": "distribution.thirdPartyDistributionChannels",
+          "type": "array",
+          "location": "body",
+          "description": "Empty array means no external distribution."
+        },
+        {
+          "name": "isReshareDisabledByAuthor",
+          "type": "bool",
+          "location": "body",
+          "description": "Is reshare disabled by author"
+        },
+        {
+          "name": "lifecycleState",
+          "type": "string",
+          "location": "body",
+          "description": "Lifecycle state",
+          "required": true
+        },
+        {
+          "name": "visibility",
+          "type": "string",
+          "location": "body",
+          "description": "Visibility",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "posts_delete",
+      "description": "Idempotent. Returns 204 whether or not the post existed. Batch delete is not supported. UNVERIFIED whether member-authored posts are deletable with a self-serve app; the docs state no author restriction but never confirm it for members. Required: postUrn, Authorization, Linkedin-Version, X-Restli-Protocol-Version. Destructive.",
+      "method": "DELETE",
+      "path": "/rest/posts",
+      "params": [
+        {
+          "name": "postUrn",
+          "type": "string",
+          "location": "path",
+          "description": "URL-encoded urn, e.g. urn%3Ali%3AugcPost%3A12345",
+          "required": true
+        },
+        {
+          "name": "Authorization",
+          "type": "string",
+          "location": "header",
+          "description": "Authorization",
+          "required": true
+        },
+        {
+          "name": "Linkedin-Version",
+          "type": "string",
+          "location": "header",
+          "description": "Linkedin version",
+          "required": true
+        },
+        {
+          "name": "X-Restli-Protocol-Version",
+          "type": "string",
+          "location": "header",
+          "description": "X restli protocol version",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "userinfo_get-current-member",
+      "description": "Returns `sub`, the app-scoped member identifier. Person IDs are unique per application, so this MUST be called at runtime to build the author URN. Never hardcode a person ID. Required: Authorization.",
+      "method": "GET",
+      "path": "/v2/userinfo",
+      "params": [
+        {
+          "name": "Authorization",
+          "type": "string",
+          "location": "header",
+          "description": "Authorization",
+          "required": true
+        }
+      ]
+    }
+  ]
+}

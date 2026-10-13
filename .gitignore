@@ -1,0 +1,19 @@
+# Build output
+/postiee
+/dist/
+*.exe
+*.test
+*.out
+
+# Local config and credentials — never commit these
+/.env
+credentials.toml
+config.toml
+*.db
+
+# Dependencies
+node_modules/
+
+# Editor
+.DS_Store
+.vscode/
