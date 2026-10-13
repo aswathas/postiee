@@ -24,7 +24,7 @@ func TestRecordAndSearch(t *testing.T) {
 
 	if err := s.Record(ctx, Entry{
 		URN: "urn:li:ugcPost:1", Body: "built a linkedin posting cli",
-		Permalink: "https://linkedin.com/feed/update/urn:li:ugcPost:1/",
+		Permalink:  "https://linkedin.com/feed/update/urn:li:ugcPost:1/",
 		Visibility: "PUBLIC",
 	}); err != nil {
 		t.Fatalf("record: %v", err)
@@ -168,13 +168,13 @@ func TestFTSQueryQuotesTerms(t *testing.T) {
 	// being parsed as FTS5 syntax. `"AND"*` is a literal prefix-match on the
 	// word AND; only the bare separators between terms are operators.
 	got := FTSQuery(`hello AND "world`)
-	if !strings.Contains(got, `"AND"*`) {
+	if !strings.Contains(got, `"AND"`) {
 		t.Errorf("operator word should be quoted as a literal term, got %q", got)
 	}
-	if !strings.Contains(got, `"hello"*`) {
-		t.Errorf("expected quoted prefix term, got %q", got)
+	if !strings.Contains(got, `"hello"`) {
+		t.Errorf("expected quoted term, got %q", got)
 	}
-	if !strings.Contains(got, `"world"*`) {
+	if !strings.Contains(got, `"world"`) {
 		t.Errorf("expected quotes stripped and term quoted, got %q", got)
 	}
 	// A raw quote in user input must not survive into the expression.

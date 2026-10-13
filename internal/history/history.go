@@ -17,6 +17,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"unicode"
 
 	_ "modernc.org/sqlite" // pure-Go driver: no cgo, so cross-compiles cleanly
 )
@@ -214,23 +215,36 @@ func (s *Store) Close() error { return s.db.Close() }
 // FTSQuery turns free user input into a safe FTS5 MATCH expression.
 //
 // Bare input is risky: a quote, a hyphen, or the word AND/NOT/OR can produce a
-// syntax error that surfaces as a confusing "malformed MATCH expression". Each
-// term becomes a quoted prefix-match, so `auth` also finds `authentication`.
+// syntax error that surfaces as a confusing "malformed MATCH expression".
+//
+// Each term is emitted as a quoted literal, which stops FTS5 from parsing it as
+// syntax. Reserved words ("AND", "NOT", "OR") are the reason quoting matters:
+// unquoted they are operators. Prefix matching needs the `*` outside the
+// closing quote — `"post"*` is a valid prefix match under FTS5, while a bare
+// `AND*` is a syntax error — so quoting the term and appending the star gives
+// both safety and prefix behaviour.
 func FTSQuery(q string) string {
 	fields := strings.Fields(q)
 	if len(fields) == 0 {
 		return `""`
 	}
-	quoted := make([]string, 0, len(fields))
+	terms := make([]string, 0, len(fields))
 	for _, f := range fields {
-		f = strings.ReplaceAll(f, `"`, "")
-		if f == "" {
+		// Keep only characters that cannot alter the MATCH grammar.
+		var b strings.Builder
+		for _, r := range f {
+			if unicode.IsLetter(r) || unicode.IsDigit(r) || r == '_' {
+				b.WriteRune(r)
+			}
+		}
+		cleaned := b.String()
+		if cleaned == "" {
 			continue
 		}
-		quoted = append(quoted, `"`+f+`"*`)
+		terms = append(terms, `"`+cleaned+`"*`)
 	}
-	if len(quoted) == 0 {
+	if len(terms) == 0 {
 		return `""`
 	}
-	return strings.Join(quoted, " AND ")
+	return strings.Join(terms, " AND ")
 }
