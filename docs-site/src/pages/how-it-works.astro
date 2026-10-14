@@ -1,0 +1,166 @@
+---
+import Base from '../layouts/Base.astro';
+import PostLifecycle from '../components/PostLifecycle.astro';
+import ScopeGate from '../components/ScopeGate.astro';
+---
+
+<Base
+  title="How it works"
+  description="The calls postiee makes, the three traps that break naive LinkedIn clients, and the scope gate that decides what is possible."
+>
+  <p class="eyebrow">Internals</p>
+  <h1>How it works</h1>
+
+  <p class="lead">
+    Three details decide whether a LinkedIn CLI works at all. Getting any of
+    them wrong produces a tool that appears to succeed and loses data.
+  </p>
+
+  <h2>The post lifecycle</h2>
+
+  <figure>
+    <PostLifecycle />
+    <figcaption>
+      Every network call <code>postiee post</code> makes, in order.
+    </figcaption>
+  </figure>
+
+  <h2>Trap one — the ID is in a header</h2>
+
+  <p>
+    <code>POST /rest/posts</code> returns <code>201 Created</code> with an
+    <strong>empty body</strong>. The post's ID arrives in the
+    <code>x-restli-id</code> response header:
+  </p>
+
+  <pre><code>HTTP/1.1 201 Created
+x-restli-id: urn:li:ugcPost:1234567890123456789
+
+&lt;no body&gt;</code></pre>
+
+  <p>
+    A client that reads the response body finds nothing and reports success
+    anyway. Because LinkedIn will not let any API read your posts back, that ID
+    is the <em>only</em> handle you will ever have on your own post — without it
+    you cannot delete it, link to it, or record it.
+  </p>
+
+  <p>
+    postiee treats a missing header as a hard error that tells you the post may
+    already exist, so you check before retrying rather than posting twice.
+  </p>
+
+  <h2>Trap two — person IDs are scoped per app</h2>
+
+  <p>
+    Every post needs an <code>author</code> field, something like
+    <code>{'urn:li:person:8675309'}</code>. That identifier is
+    <strong>unique to your application</strong>. The same human has a different
+    ID under a different app, and copying one across apps returns 404.
+  </p>
+
+  <pre><code>GET https://api.linkedin.com/v2/userinfo
+Authorization: Bearer $TOKEN
+
+&#123; "sub": "AbCdEfGh1Jk", "name": "Your Name" &#125;</code></pre>
+
+  <pre><code>author = "urn:li:person:" + sub</code></pre>
+
+  <p>
+    This must be resolved at runtime, every time. It cannot be a config value or
+    a literal, and it requires the <code>openid</code> scope.
+  </p>
+
+  <h2>Trap three — URNs need full percent-encoding</h2>
+
+  <p>
+    URNs in URL paths must be completely encoded:
+  </p>
+
+  <pre><code>urn:li:ugcPost:12345  →  urn%3Ali%3AugcPost%3A12345</code></pre>
+
+  <p>
+    Go's <code>url.PathEscape</code> does <em>not</em> do this — colons are
+    legal in a path segment, so it leaves them bare and the request 404s.
+    postiee uses <code>QueryEscape</code>, which does encode them. A test pins
+    this, because the failure looks like "the post does not exist" rather than
+    "you escaped it wrong".
+  </p>
+
+  <h2>Two more things worth knowing</h2>
+
+  <h3>Images are two steps, not three</h3>
+  <p>
+    <code>initializeUpload</code> returns a signed URL <em>and</em> the final
+    image URN. You then PUT the bytes and you are done. There is no
+    <code>finalizeUpload</code> for images — that step belongs to the Videos API
+    and will confuse anyone who assumes otherwise.
+  </p>
+
+  <h3>The version header is a moving target</h3>
+  <p>
+    Every versioned route needs <code>Linkedin-Version: YYYYMM</code>. Versions
+    are supported for about twelve months and then sunset. It is pinned to a
+    single constant, currently <code>202609</code>.
+  </p>
+
+  <h2>The scope gate</h2>
+
+  <p>
+    What you can reach depends entirely on which LinkedIn products your developer
+    app has been granted — and one of those permissions is closed outright.
+  </p>
+
+  <figure>
+    <ScopeGate />
+    <figcaption>
+      Three tiers. postiee operates entirely inside the first.
+    </figcaption>
+  </figure>
+
+  <p>
+    This gate is the reason the tool is shaped the way it is. Because
+    <code>r_member_social</code> is closed, reading posts back is impossible —
+    so the local record becomes the product rather than a feature. Because
+    comments and analytics are partner-gated, there is nothing to sync — so the
+    CLI stays small enough to be correct.
+  </p>
+
+  <h2>Storage</h2>
+
+  <p>
+    History lives in a single SQLite file with an FTS5 index over post bodies.
+    WAL journalling, one row per post, upsert on the post ID so retrying never
+    duplicates.
+  </p>
+
+  <pre><code>CREATE TABLE posts (
+  post_urn    TEXT PRIMARY KEY,
+  body        TEXT NOT NULL,
+  permalink   TEXT NOT NULL DEFAULT '',
+  media_urn   TEXT NOT NULL DEFAULT '',
+  visibility  TEXT NOT NULL DEFAULT 'PUBLIC',
+  created_at  INTEGER NOT NULL
+);
+
+CREATE VIRTUAL TABLE posts_fts USING fts5(
+  post_urn UNINDEXED,
+  body,
+  tokenize = 'porter unicode61'
+);</code></pre>
+
+  <h2>Search behaviour</h2>
+
+  <p>
+    The <code>porter unicode61</code> tokenizer gives stemming, so
+    <code>authentic</code> finds <code>authentication</code>. It indexes
+    <strong>whole tokens</strong>, so a partial-word prefix does not match:
+    <code>search harn</code> will not find <code>harness</code>.
+  </p>
+
+  <p>
+    That limit is stated plainly rather than hidden behind a workaround, because
+    a search that silently returns nothing is worse than one that documents its
+    boundary.
+  </p>
+</Base>

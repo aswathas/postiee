@@ -1,0 +1,129 @@
+---
+/**
+ * The three-tier scope gate: which LinkedIn API surface you can reach depends
+ * entirely on which products your developer app has been granted.
+ */
+---
+
+<svg viewBox="0 0 720 480" role="img" aria-labelledby="gate-title gate-desc">
+  <title id="gate-title">The three-tier LinkedIn scope gate</title>
+  <desc id="gate-desc">
+    Tier one, self-serve, granted immediately by the Share on LinkedIn and Sign
+    In with LinkedIn products: posting and identifying yourself. Tier two,
+    Community Management API, requires vetted partner approval: comments,
+    reactions, analytics, reading posts back. Tier three, closed entirely, no
+    public API at any tier: messaging and connection invitations.
+  </desc>
+
+  <rect width="720" height="480" fill="#010409" rx="6" />
+
+  <!-- Tier 1 -->
+  <rect x="24" y="24" width="672" height="128" rx="6"
+        fill="#0d1f0d" stroke="#3fb950" stroke-width="1.5" />
+  <text x="44" y="52" fill="#3fb950" font-family="ui-monospace, monospace" font-size="14" font-weight="700">
+    TIER 1 — SELF-SERVE
+  </text>
+  <text x="44" y="72" fill="#9198a1" font-family="ui-monospace, monospace" font-size="11">
+    Granted instantly. No review, no payment.
+  </text>
+
+  <rect x="44" y="88" width="200" height="48" rx="4" fill="#161b22" stroke="#30363d" />
+  <text x="58" y="108" fill="#e6edf3" font-family="ui-monospace, monospace" font-size="11" font-weight="600">
+    w_member_social
+  </text>
+  <text x="58" y="125" fill="#9198a1" font-family="ui-monospace, monospace" font-size="10">
+    create a post
+  </text>
+
+  <rect x="256" y="88" width="200" height="48" rx="4" fill="#161b22" stroke="#30363d" />
+  <text x="270" y="108" fill="#e6edf3" font-family="ui-monospace, monospace" font-size="11" font-weight="600">
+    openid + profile
+  </text>
+  <text x="270" y="125" fill="#9198a1" font-family="ui-monospace, monospace" font-size="10">
+    identify yourself
+  </text>
+
+  <rect x="468" y="88" width="212" height="48" rx="4" fill="#0d1f0d" stroke="#3fb950" />
+  <text x="482" y="108" fill="#3fb950" font-family="ui-monospace, monospace" font-size="11" font-weight="600">
+    ✓ postiee works here
+  </text>
+  <text x="482" y="125" fill="#9198a1" font-family="ui-monospace, monospace" font-size="10">
+    post · history · search
+  </text>
+
+  <!-- Tier 2 -->
+  <rect x="24" y="168" width="672" height="144" rx="6"
+        fill="#1a1408" stroke="#d29922" stroke-width="1.5" />
+  <text x="44" y="196" fill="#d29922" font-family="ui-monospace, monospace" font-size="14" font-weight="700">
+    TIER 2 — COMMUNITY MANAGEMENT
+  </text>
+  <text x="44" y="216" fill="#9198a1" font-family="ui-monospace, monospace" font-size="11">
+    Vetted partner review. Requires a business, legal entity, and an
+    agreement to the Marketing API terms.
+  </text>
+
+  <rect x="44" y="232" width="200" height="48" rx="4" fill="#161b22" stroke="#30363d" />
+  <text x="58" y="252" fill="#e6edf3" font-family="ui-monospace, monospace" font-size="11" font-weight="600">
+    w_member_social_feed
+  </text>
+  <text x="58" y="269" fill="#9198a1" font-family="ui-monospace, monospace" font-size="10">
+    comment · react
+  </text>
+
+  <rect x="256" y="232" width="200" height="48" rx="4" fill="#161b22" stroke="#30363d" />
+  <text x="270" y="252" fill="#e6edf3" font-family="ui-monospace, monospace" font-size="11" font-weight="600">
+    r_member_postAnalytics
+  </text>
+  <text x="270" y="269" fill="#9198a1" font-family="ui-monospace, monospace" font-size="10">
+    impressions · followers
+  </text>
+
+  <rect x="468" y="232" width="212" height="48" rx="4" fill="#1a0a0a" stroke="#f85149" />
+  <text x="482" y="252" fill="#f85149" font-family="ui-monospace, monospace" font-size="11" font-weight="600">
+    ✗ not in postiee
+  </text>
+  <text x="482" y="269" fill="#9198a1" font-family="ui-monospace, monospace" font-size="10">
+    would 403 on first use
+  </text>
+
+  <rect x="44" y="288" width="636" height="16" rx="3" fill="#161b22" stroke="#30363d" />
+  <text x="54" y="300" fill="#f85149" font-family="ui-monospace, monospace" font-size="10">
+    r_member_social — reading your OWN posts — is CLOSED, not gated. Not
+    accepting requests at this time.
+  </text>
+
+  <!-- Tier 3 -->
+  <rect x="24" y="328" width="672" height="128" rx="6"
+        fill="#1a0a0a" stroke="#f85149" stroke-width="1.5" />
+  <text x="44" y="356" fill="#f85149" font-family="ui-monospace, monospace" font-size="14" font-weight="700">
+    TIER 3 — CLOSED AT EVERY TIER
+  </text>
+  <text x="44" y="376" fill="#9198a1" font-family="ui-monospace, monospace" font-size="11">
+    No product in the developer catalogue. No endpoint in the docs. Explicitly
+    prohibited use.
+  </text>
+
+  <rect x="44" y="392" width="200" height="48" rx="4" fill="#161b22" stroke="#30363d" />
+  <text x="58" y="412" fill="#e6edf3" font-family="ui-monospace, monospace" font-size="11" font-weight="600">
+    messaging
+  </text>
+  <text x="58" y="429" fill="#9198a1" font-family="ui-monospace, monospace" font-size="10">
+    no DM API exists
+  </text>
+
+  <rect x="256" y="392" width="200" height="48" rx="4" fill="#161b22" stroke="#30363d" />
+  <text x="270" y="412" fill="#e6edf3" font-family="ui-monospace, monospace" font-size="11" font-weight="600">
+    invitations
+  </text>
+  <text x="270" y="429" fill="#9198a1" font-family="ui-monospace, monospace" font-size="10">
+    no networking API
+  </text>
+
+  <rect x="468" y="392" width="212" height="48" rx="4" fill="#1a0a0a" stroke="#f85149" />
+  <text x="482" y="412" fill="#f85149" font-family="ui-monospace, monospace" font-size="11" font-weight="600">
+    ✗ never implementable
+  </text>
+  <text x="482" y="429" fill="#9198a1" font-family="ui-monospace, monospace" font-size="10">
+    at any access level
+  </text>
+</svg>

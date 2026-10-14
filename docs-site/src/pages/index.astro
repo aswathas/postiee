@@ -1,0 +1,145 @@
+---
+import Base from '../layouts/Base.astro';
+import PostLifecycle from '../components/PostLifecycle.astro';
+---
+
+<Base
+  title="Post to LinkedIn from your terminal"
+  description="postiee posts to LinkedIn's official API and keeps a searchable local history, because LinkedIn will not let any API read your posts back."
+>
+  <p class="eyebrow">LinkedIn CLI for people who use terminals</p>
+  <h1>Post to LinkedIn. Search your own history.</h1>
+
+  <p class="lead">
+    LinkedIn's permission to read your own posts is
+    <strong>closed to every applicant</strong> — not slow, not paid, closed.
+    postiee captures the post ID the moment it is created and keeps a local,
+    full-text-searchable record, because that record is the only copy that will
+    ever exist.
+  </p>
+
+  <p>
+    <a class="cta" href="https://github.com/aswathas/postiee">Get it on GitHub</a>
+    <a class="cta secondary" href="/docs">Read the docs</a>
+  </p>
+
+  <h2>Install</h2>
+
+  <p><strong>macOS and Linux</strong></p>
+  <pre><code>curl -fsSL https://raw.githubusercontent.com/aswathas/postiee/main/install.sh | sh</code></pre>
+
+  <p><strong>Windows (PowerShell)</strong></p>
+  <pre><code>irm https://raw.githubusercontent.com/aswathas/postiee/main/install.ps1 | iex</code></pre>
+
+  <p>
+    No Go toolchain needed — those download a prebuilt binary. Full setup,
+    including the LinkedIn app you need to create, is on the
+    <a href="/docs">docs page</a>.
+  </p>
+
+  <h2>Use it</h2>
+
+  <pre><code># post something
+$ postiee post "shipped a new feature today"
+
+# with an image
+$ postiee post "our signup curve" --image chart.png --alt "signups by week"
+
+# find something you posted months ago
+$ postiee search harness
+
+# everything you've posted, newest first
+$ postiee history</code></pre>
+
+  <h2>What it does, and what it cannot</h2>
+
+  <div class="grid">
+    <div class="card">
+      <p><span class="badge ok">works</span></p>
+      <p>
+        <strong>Post</strong> text, one image, or a file. Public, connections,
+        or logged-in visibility.
+      </p>
+    </div>
+    <div class="card">
+      <p><span class="badge ok">works</span></p>
+      <p>
+        <strong>Search</strong> your own posts with stemming and multi-term
+        queries. 145&nbsp;µs across 1,000 posts.
+      </p>
+    </div>
+    <div class="card">
+      <p><span class="badge no">impossible</span></p>
+      <p>
+        <strong>Comments, reactions, analytics</strong> — need LinkedIn partner
+        approval this project does not have.
+      </p>
+    </div>
+    <div class="card">
+      <p><span class="badge no">impossible</span></p>
+      <p>
+        <strong>Messaging, invitations</strong> — no public LinkedIn API exists
+        at any access tier.
+      </p>
+    </div>
+  </div>
+
+  <p class="note">
+    Those limits are not oversights. They are why this tool is small and why the
+    local history is the point. <a href="/features">See the full scope
+    breakdown</a>.
+  </p>
+
+  <h2>The whole idea, in one diagram</h2>
+
+  <figure>
+    <PostLifecycle />
+    <figcaption>
+      Every call <code>postiee post</code> makes, and the three places naive
+      LinkedIn clients break.
+    </figcaption>
+  </figure>
+
+  <h2>Fast, because there is very little to do</h2>
+
+  <table>
+    <caption class="sr-only" style="position:absolute;left:-9999px">
+      Measured operation latency
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Operation</th>
+        <th scope="col" class="num">Latency</th>
+        <th scope="col" class="num">Allocations</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Search 1,000 posts</td>
+        <td class="num">145 µs</td>
+        <td class="num">32</td>
+      </tr>
+      <tr>
+        <td>Search 10,000 posts</td>
+        <td class="num">347 µs</td>
+        <td class="num">32</td>
+      </tr>
+      <tr>
+        <td>List history</td>
+        <td class="num">79 µs</td>
+        <td class="num">581</td>
+      </tr>
+      <tr>
+        <td>Record a post</td>
+        <td class="num">1.48 ms</td>
+        <td class="num">33</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    Search is nearly flat in corpus size: 10× the posts costs 2.4× the latency,
+    because FTS5 queries an index rather than scanning rows. Reproduce with
+    <code>go test -bench=. -benchmem ./bench/</code>.
+  </p>
+</Base>

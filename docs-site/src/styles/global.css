@@ -1,0 +1,402 @@
+/*
+ * Postiee docs — design tokens.
+ *
+ * Developer-tool aesthetic: dark surface, one restrained accent, monospace for
+ * anything that came from a terminal. Contrast ratios are noted where they
+ * matter; body text is held at or above 4.5:1 against its surface.
+ */
+
+:root {
+  /* Surfaces, darkest to lightest */
+  --bg: #0d1117;
+  --bg-raised: #161b22;
+  --bg-inset: #010409;
+
+  /* Border */
+  --border: #30363d;
+  --border-strong: #484f58;
+
+  /* Text. --fg on --bg is 15.8:1; --fg-muted on --bg is 5.3:1; both pass AA. */
+  --fg: #e6edf3;
+  --fg-muted: #9198a1;
+  --fg-subtle: #6e7681;
+
+  /* Accent. On --bg this is 5.2:1, so it is safe for link text. */
+  --accent: #4493f8;
+  --accent-dim: #1f6feb;
+
+  /* Semantic. Paired with an icon or label everywhere, never colour alone. */
+  --ok: #3fb950;
+  --warn: #d29922;
+  --danger: #f85149;
+
+  /* Type */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans',
+    Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
+
+  /* Space — 4px scale */
+  --s1: 0.25rem;
+  --s2: 0.5rem;
+  --s3: 0.75rem;
+  --s4: 1rem;
+  --s5: 1.5rem;
+  --s6: 2rem;
+  --s7: 3rem;
+  --s8: 4rem;
+
+  --radius: 6px;
+  --maxw: 46rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* Never disable zoom; the viewport meta keeps initial-scale at 1. */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 1rem; /* 16px floor: prevents iOS auto-zoom on focus */
+  line-height: 1.65; /* comfortable for long-form docs */
+  -webkit-font-smoothing: antialiased;
+}
+
+code,
+pre,
+kbd {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover,
+a:focus-visible {
+  text-decoration: underline;
+}
+
+/* A visible focus ring on every interactive element. Never remove it. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  padding: var(--s3) var(--s4);
+  background: var(--accent);
+  color: #fff;
+  z-index: 100;
+}
+.skip-link:focus {
+  left: var(--s4);
+  top: var(--s4);
+}
+
+/* ---- layout ---- */
+
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 var(--s5);
+}
+
+header.site {
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 10;
+}
+
+header.site .wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--s5);
+  min-height: 3.5rem;
+  flex-wrap: wrap;
+}
+
+.brand {
+  font-weight: 600;
+  color: var(--fg);
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+.brand:hover {
+  text-decoration: none;
+  color: var(--accent);
+}
+
+nav.site navlist {
+  display: flex;
+  gap: var(--s4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+}
+nav.site a {
+  color: var(--fg-muted);
+  font-size: 0.925rem;
+  padding: var(--s2) 0;
+  display: inline-block;
+}
+nav.site a:hover {
+  color: var(--fg);
+  text-decoration: none;
+}
+/* Current page is marked by weight and colour together, not colour alone. */
+nav.site a[aria-current='page'] {
+  color: var(--fg);
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+main {
+  padding: var(--s7) 0 var(--s8);
+}
+
+footer.site {
+  border-top: 1px solid var(--border);
+  padding: var(--s5) 0;
+  color: var(--fg-subtle);
+  font-size: 0.9rem;
+}
+
+/* ---- typography ---- */
+
+h1,
+h2,
+h3 {
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--s4);
+}
+h1 {
+  font-size: 2.25rem;
+  margin-bottom: var(--s3);
+}
+h2 {
+  font-size: 1.5rem;
+  margin-top: var(--s7);
+  padding-top: var(--s5);
+  border-top: 1px solid var(--border);
+}
+h3 {
+  font-size: 1.125rem;
+  margin-top: var(--s5);
+}
+
+p,
+ul,
+ol {
+  margin: 0 0 var(--s4);
+}
+
+.lead {
+  font-size: 1.15rem;
+  color: var(--fg-muted);
+  margin-bottom: var(--s6);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: var(--s2);
+}
+
+/* ---- code ---- */
+
+pre {
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--s4);
+  overflow-x: auto; /* code may be wide; the page itself never scrolls sideways */
+  margin: 0 0 var(--s5);
+  line-height: 1.5;
+}
+
+code {
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+kbd {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+  font-size: 0.85em;
+}
+
+/* ---- components ---- */
+
+.card {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--s5);
+  margin-bottom: var(--s4);
+}
+
+.grid {
+  display: grid;
+  gap: var(--s4);
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--s5);
+  font-size: 0.95rem;
+}
+th,
+td {
+  text-align: left;
+  padding: var(--s3);
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+th {
+  color: var(--fg-muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+/* Numeric columns use tabular figures so columns do not jitter. */
+td.num,
+th.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 0.15em 0.5em;
+  border-radius: 4px;
+  border: 1px solid var(--border-strong);
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+.badge.ok {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+.badge.no {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.badge.mid {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+.note {
+  border-left: 3px solid var(--accent);
+  background: var(--bg-raised);
+  padding: var(--s4);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  margin: 0 0 var(--s5);
+}
+.note.warn {
+  border-left-color: var(--warn);
+}
+
+figure {
+  margin: 0 0 var(--s6);
+}
+figure img,
+figure svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-inset);
+}
+figcaption {
+  color: var(--fg-subtle);
+  font-size: 0.875rem;
+  margin-top: var(--s3);
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
+  background: var(--accent-dim);
+  color: #fff;
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  margin: 0 var(--s2) var(--s2) 0;
+}
+.cta:hover {
+  background: var(--accent);
+  text-decoration: none;
+}
+.cta.secondary {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--fg);
+}
+.cta.secondary:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Touch targets stay at least 44px tall on coarse pointers. */
+@media (pointer: coarse) {
+  nav.site a,
+  .cta {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* Honour the OS reduced-motion preference: no transitions when asked. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

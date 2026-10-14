@@ -1,0 +1,83 @@
+---
+/**
+ * The CLI surface: what ships, and — more usefully — what deliberately
+ * does not ship.
+ */
+---
+
+<svg viewBox="0 0 720 440" role="img" aria-labelledby="cli-title cli-desc">
+  <title id="cli-title">The postiee command surface</title>
+  <desc id="cli-desc">
+    Eight commands that ship: auth, post, history, search, forget, doctor,
+    version and help. Six commands deliberately omitted because the LinkedIn API
+    does not permit them: comment, react, analytics, dm, connect and
+    who-liked.
+  </desc>
+
+  <rect width="720" height="440" fill="#010409" rx="6" />
+
+  <!-- shipped -->
+  <rect x="24" y="24" width="320" height="392" rx="6"
+        fill="#0d1f0d" stroke="#3fb950" stroke-width="1.5" />
+  <text x="44" y="52" fill="#3fb950" font-family="ui-monospace, monospace" font-size="14" font-weight="700">
+    SHIPS
+  </text>
+
+  <g fill="#e6edf3" font-family="ui-monospace, monospace" font-size="12">
+    <text x="44" y="86" font-weight="600">auth</text>
+    <text x="44" y="102" fill="#9198a1" font-size="10">login · logout · status</text>
+
+    <text x="44" y="140" font-weight="600">post</text>
+    <text x="44" y="156" fill="#9198a1" font-size="10">--file --image --alt -v</text>
+
+    <text x="44" y="194" font-weight="600">history</text>
+    <text x="44" y="210" fill="#9198a1" font-size="10">newest first</text>
+
+    <text x="44" y="248" font-weight="600">search</text>
+    <text x="44" y="264" fill="#9198a1" font-size="10">FTS5 over your posts</text>
+
+    <text x="44" y="302" font-weight="600">forget</text>
+    <text x="44" y="318" fill="#9198a1" font-size="10">drop from local history</text>
+
+    <text x="44" y="356" font-weight="600">doctor</text>
+    <text x="44" y="372" fill="#9198a1" font-size="10">config · auth · API</text>
+  </g>
+
+  <!-- omitted -->
+  <rect x="360" y="24" width="336" height="392" rx="6"
+        fill="#1a0a0a" stroke="#f85149" stroke-width="1.5" />
+  <text x="380" y="52" fill="#f85149" font-family="ui-monospace, monospace" font-size="14" font-weight="700">
+    DELIBERATELY ABSENT
+  </text>
+  <text x="380" y="70" fill="#9198a1" font-family="ui-monospace, monospace" font-size="10">
+    not "unimplemented" — not implementable
+  </text>
+
+  <g fill="#e6edf3" font-family="ui-monospace, monospace" font-size="12">
+    <text x="380" y="100">comment</text>
+    <text x="380" y="115" fill="#6e7681" font-size="10">needs partner approval</text>
+
+    <text x="380" y="147">react</text>
+    <text x="380" y="162" fill="#6e7681" font-size="10">needs partner approval</text>
+
+    <text x="380" y="194">analytics</text>
+    <text x="380" y="209" fill="#6e7681" font-size="10">needs partner approval</text>
+
+    <text x="380" y="241">dm</text>
+    <text x="380" y="256" fill="#6e7681" font-size="10">no API exists at any tier</text>
+
+    <text x="380" y="288">connect</text>
+    <text x="380" y="303" fill="#6e7681" font-size="10">no API exists at any tier</text>
+
+    <text x="380" y="335">who-liked</text>
+    <text x="380" y="350" fill="#6e7681" font-size="10">r_member_social closed</text>
+  </g>
+
+  <rect x="380" y="368" width="296" height="34" rx="4" fill="#161b22" stroke="#30363d" />
+  <text x="392" y="382" fill="#e6edf3" font-family="ui-monospace, monospace" font-size="10" font-weight="600">
+    A command that 403s on first use is
+  </text>
+  <text x="392" y="395" fill="#e6edf3" font-family="ui-monospace, monospace" font-size="10">
+    worse than an absent one.
+  </text>
+</svg>

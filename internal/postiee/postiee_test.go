@@ -17,7 +17,7 @@ import (
 
 func TestCreatePostReadsIDFromHeaderNotBody(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set(PostIDHeader, "urn:li:ugcPost:68447855235931240")
+		w.Header().Set(PostIDHeader, "urn:li:ugcPost:1234567890123456789")
 		w.WriteHeader(http.StatusCreated)
 		// Body deliberately empty, exactly as LinkedIn returns it.
 	}))
@@ -30,10 +30,10 @@ func TestCreatePostReadsIDFromHeaderNotBody(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create: %v", err)
 	}
-	if got.URN != "urn:li:ugcPost:68447855235931240" {
+	if got.URN != "urn:li:ugcPost:1234567890123456789" {
 		t.Fatalf("post id not read from header: got %q", got.URN)
 	}
-	if !strings.Contains(got.Permalink, "urn:li:ugcPost:68447855235931240") {
+	if !strings.Contains(got.Permalink, "urn:li:ugcPost:1234567890123456789") {
 		t.Fatalf("permalink missing urn: %q", got.Permalink)
 	}
 }

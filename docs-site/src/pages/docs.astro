@@ -1,0 +1,269 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Docs"
+  description="Installation, LinkedIn app setup, authentication, and every postiee command with its flags."
+>
+  <p class="eyebrow">Documentation</p>
+  <h1>Docs</h1>
+
+  <p class="lead">
+    Install it, create a LinkedIn app, log in, post. About ten minutes the first
+    time, seconds after that.
+  </p>
+
+  <h2>Install</h2>
+
+  <p><strong>macOS and Linux</strong></p>
+  <pre><code>curl -fsSL https://raw.githubusercontent.com/aswathas/postiee/main/install.sh | sh</code></pre>
+
+  <p><strong>Windows (PowerShell)</strong></p>
+  <pre><code>irm https://raw.githubusercontent.com/aswathas/postiee/main/install.ps1 | iex</code></pre>
+
+  <p><strong>From source</strong> — needs Go 1.26.9 or newer:</p>
+  <pre><code>git clone https://github.com/aswathas/postiee.git
+cd postiee
+go build -o postiee ./cmd/postiee
+sudo mv postiee /usr/local/bin/</code></pre>
+
+  <p>
+    The installers detect your OS and CPU, prefer a per-user location so no
+    admin rights are needed, and warn if the install directory is not on
+    <code>PATH</code>.
+  </p>
+
+  <h2>Create a LinkedIn app</h2>
+
+  <ol>
+    <li>
+      Go to <a href="https://www.linkedin.com/developers/apps">linkedin.com/developers/apps</a>
+      and click <strong>Create app</strong>.
+    </li>
+    <li>
+      <strong>Products</strong> tab → add <strong>Share on LinkedIn</strong>.
+      This grants <code>w_member_social</code>. Self-serve, no review.
+    </li>
+    <li>
+      <strong>Products</strong> tab → add <strong>Sign In with LinkedIn</strong>.
+      This grants <code>openid</code> and <code>profile</code>. You need it to
+      resolve your own member ID.
+    </li>
+    <li>
+      <strong>Auth</strong> tab → add this exact redirect URL:
+      <pre><code>http://localhost:8085/callback</code></pre>
+    </li>
+  </ol>
+
+  <p class="note warn">
+    LinkedIn matches redirect URLs as <strong>exact strings</strong>. If you
+    registered <code>localhost</code> and the CLI sends <code>127.0.0.1</code>,
+    login fails with <em>"redirect_uri does not match the registered value"</em>.
+    Set <code>POSTIEE_REDIRECT_URI</code> to match whatever you registered.
+  </p>
+
+  <h2>Add your credentials</h2>
+
+  <p>
+    Write them to a file rather than passing them as flags — a flag value lands
+    in your shell history and in process listings.
+  </p>
+
+  <pre><code>mkdir -p ~/.config/postiee
+chmod 700 ~/.config/postiee
+
+cat > ~/.config/postiee/credentials.toml &lt;&lt;EOF
+client_id = "your_client_id"
+client_secret = "your_client_secret"
+EOF
+
+chmod 600 ~/.config/postiee/credentials.toml</code></pre>
+
+  <p>
+    On Windows the same file lives at
+    <code>%USERPROFILE%\.config\postiee\credentials.toml</code>.
+  </p>
+
+  <h2>Log in</h2>
+
+  <pre><code>postiee auth login --port 8085</code></pre>
+
+  <p>
+    Your browser opens, you approve, and the token is stored. It lasts 60 days.
+    Programmatic refresh is reserved for LinkedIn partners, so after expiry you
+    re-run <code>auth login</code>; the consent screen is skipped if you are
+    still signed in.
+  </p>
+
+  <h2>Commands</h2>
+
+  <h3>post</h3>
+  <pre><code>postiee post "some text"
+postiee post --file post.md
+postiee post "with a picture" --image chart.png --alt "a line chart"
+postiee post "connections only" -v CONNECTIONS</code></pre>
+  <p>
+    Visibility is <code>PUBLIC</code>, <code>CONNECTIONS</code>, or
+    <code>LOGGED_IN</code>. Prefer <code>--file</code> for long posts — it
+    avoids shell quoting entirely.
+  </p>
+
+  <h3>history</h3>
+  <pre><code>postiee history
+postiee history --limit 200</code></pre>
+  <p>Every post recorded locally, newest first.</p>
+
+  <h3>search</h3>
+  <pre><code>postiee search harness
+postiee search "harness agent" --json</code></pre>
+  <p>
+    Terms are ANDed. Porter stemming is on, so <code>authentic</code> finds
+    <code>authentication</code>.
+  </p>
+  <p class="note warn">
+    <strong>Partial-word prefixes do not work.</strong> SQLite FTS5 indexes
+    whole tokens, so <code>search harn</code> will not find
+    <code>harness</code>. Use the full word.
+  </p>
+
+  <h3>forget</h3>
+  <pre><code>postiee forget urn:li:ugcPost:12345</code></pre>
+  <p>Removes a post from your local history. Does not delete it on LinkedIn.</p>
+
+  <h3>auth and doctor</h3>
+  <pre><code>postiee auth status
+postiee auth logout
+postiee doctor</code></pre>
+  <p>
+    <code>doctor</code> checks config, credentials, and that
+    <code>api.linkedin.com</code> is reachable.
+  </p>
+
+  <h2>Agent mode</h2>
+  <pre><code>postiee --agent search harness</code></pre>
+  <p>
+    Sets <code>--json --compact --no-input --no-color</code> together. Use it
+    whenever you are parsing output.
+  </p>
+
+  <h2>Environment variables</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Variable</th>
+        <th scope="col">Effect</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>POSTIEE_SCOPES</code></td>
+        <td>
+          Override the requested OAuth scopes. Use during setup when your app
+          only has <code>w_member_social</code> and you have not added Sign In
+          yet.
+        </td>
+      </tr>
+      <tr>
+        <td><code>POSTIEE_REDIRECT_URI</code></td>
+        <td>
+          Override the redirect host spelling. Must match your app's
+          registration exactly.
+        </td>
+      </tr>
+      <tr>
+        <td><code>POSTIEE_TOKEN</code></td>
+        <td>Use a specific access token instead of the stored one.</td>
+      </tr>
+      <tr>
+        <td><code>POSTIEE_HISTORY_DB</code></td>
+        <td>Point the history database somewhere else.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Troubleshooting</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Error</th>
+        <th scope="col">Fix</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>unauthorized_scope_error</code></td>
+        <td>
+          A requested scope is not granted to your app. Add the product, or
+          narrow the request with <code>POSTIEE_SCOPES</code>.
+        </td>
+      </tr>
+      <tr>
+        <td><code>redirect_uri does not match</code></td>
+        <td>
+          Set <code>POSTIEE_REDIRECT_URI</code> to exactly what is registered in
+          your Auth tab.
+        </td>
+      </tr>
+      <tr>
+        <td><code>403 … userinfo</code></td>
+        <td>
+          <code>openid</code> is not yet active. Add Sign In with LinkedIn, wait
+          about an hour for propagation, then <code>auth logout</code> and log in
+          again.
+        </td>
+      </tr>
+      <tr>
+        <td><code>422 … /author</code></td>
+        <td>
+          Your app lacks <code>openid</code>, so the member URN cannot be
+          resolved.
+        </td>
+      </tr>
+      <tr>
+        <td>Nothing found by <code>search</code></td>
+        <td>
+          You searched a partial word. FTS5 matches whole tokens only — try
+          <code>harness</code> rather than <code>harn</code>.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Rate limit</h2>
+  <p>
+    <strong>150 requests per day per member.</strong> One post is one request.
+    A script that loops will hit this, and the symptom looks like an unrelated
+    error rather than a limit.
+  </p>
+
+  <h2>Where files live</h2>
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">What</th>
+        <th scope="col">macOS / Linux</th>
+        <th scope="col">Windows</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Credentials</td>
+        <td><code>~/.config/postiee/</code></td>
+        <td><code>%USERPROFILE%\.config\postiee\</code></td>
+      </tr>
+      <tr>
+        <td>Token</td>
+        <td><code>~/.local/share/postiee/</code></td>
+        <td><code>%LOCALAPPDATA%\postiee\</code></td>
+      </tr>
+      <tr>
+        <td>History</td>
+        <td><code>~/.config/postiee/history.db</code></td>
+        <td><code>%USERPROFILE%\.config\postiee\history.db</code></td>
+      </tr>
+    </tbody>
+  </table>
+</Base>

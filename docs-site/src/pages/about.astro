@@ -1,0 +1,143 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="About"
+  description="Why postiee exists: LinkedIn will not let any API read your own posts back, so the local record is the product."
+>
+  <p class="eyebrow">Why</p>
+  <h1>About</h1>
+
+  <p class="lead">
+    This tool exists because of one closed permission.
+  </p>
+
+  <h2>The problem</h2>
+
+  <p>
+    You post something. You cannot find it again. LinkedIn's own search has no
+    "your posts" filter, and once a post is deleted it is unfindable there too.
+  </p>
+
+  <p>
+    So you go looking for a tool that keeps your post history. You find a few
+    things instead:
+  </p>
+
+  <ul>
+    <li>
+      <strong>LinkedIn's data export</strong> — a static archive, requested by
+      hand, desktop-only, with a 72-hour download window. Not searchable, not
+      ongoing.
+    </li>
+    <li>
+      <strong>Scheduling tools</strong> — Buffer, Hootsuite, Taplio, and the
+      rest. Buffer and Hootsuite use the official API; several others drive a
+      browser session, which risks the account. Hootsuite starts at
+      $99/user/month to schedule posts on a platform that gives you a scheduler
+      for free.
+    </li>
+    <li>
+      <strong>Unofficial CLIs</strong> — some are good, but they scrape with
+      your session cookies. Some of their users report bans six months into
+      apparently-clean automation.
+    </li>
+  </ul>
+
+  <p>
+    One project came close: an MIT-licensed MCP server using the official API
+    with a local SQLite log of created posts. But it stores the post text without
+    any way to query it, and its <code>list_my_posts</code> reads only that local
+    database — never LinkedIn — so anything you posted before installing it is
+    invisible.
+  </p>
+
+  <h2>The specific thing that makes it impossible</h2>
+
+  <p>
+    LinkedIn has a permission called <code>r_member_social</code> for reading
+    your own posts. It is not slow, not paid, and not partner-gated.
+    <strong>It is closed</strong> — the documentation says it is not accepting
+    access requests at this time.
+  </p>
+
+  <p>
+    That is the whole problem in one line. You can write to LinkedIn through an
+    approved app, but no approved app can read back what it wrote. And LinkedIn's
+    own native scheduler, which does let you browse your history, is a
+    web product with no API.
+  </p>
+
+  <p class="note">
+    The practical consequence: if you lose a post's ID at creation time, that
+    post is gone. Not hidden, not archived — gone. Everything in postiee follows
+    from taking that seriously.
+  </p>
+
+  <h2>What that implies for the design</h2>
+
+  <ol>
+    <li>
+      <strong>The post ID is the first-class concern.</strong> It comes from a
+      response header because the body is empty. If it is missing, the tool
+      fails loudly instead of reporting a success it cannot back up.
+    </li>
+    <li>
+      <strong>The local record is the product, not a feature.</strong> SQLite
+      with full-text search, because a log you cannot query is not a history.
+    </li>
+    <li>
+      <strong>Nothing ships that cannot work.</strong> No comment command that
+      403s, no analytics stub. The absence list is longer than the feature list,
+      and each omission says why.
+    </li>
+    <li>
+      <strong>No scraping, ever.</strong> Official API only. Your credentials go
+      to <code>api.linkedin.com</code> and nowhere else.
+    </li>
+  </ol>
+
+  <h2>What it is not</h2>
+
+  <p>
+    It is not a growth tool, a scheduler, or an analytics dashboard. It is a
+    small, correct program that posts and remembers — sized to what one person
+    can actually use, running on Go with no runtime dependencies.
+  </p>
+
+  <h2>How it was built</h2>
+
+  <p>
+    The scaffold came from
+    <a href="https://github.com/mvanhorn/cli-printing-press">CLI Printing
+    Press</a>, which generates Go CLIs with a local store and offline search. The
+    LinkedIn client, the history layer, credential handling, and every correction
+    to the generated code were hand-written.
+  </p>
+
+  <p>
+    Two of those corrections are the reason this works at all: capturing the post
+    ID from the response header, and resolving the member URN at runtime instead
+    of accepting it as a parameter. Both were absent from the generated output.
+    A third — that image upload has no finalize step — was caught while writing
+    the spec.
+  </p>
+
+  <h2>Author</h2>
+
+  <p>
+    Built by <a href="https://github.com/aswathas">Aswath AS</a> — AI developer
+    working across AI, Web3, finance, and security.
+    <a href="https://hellokity.vercel.app/">Portfolio</a> ·
+    <a href="https://github.com/aswathas/postiee">Source</a>
+  </p>
+
+  <h2>License</h2>
+
+  <p>
+    Apache-2.0. Use it, fork it, extend it. If you add a scope LinkedIn has
+    opened since this was written, the architecture will take it — the local
+    history already stores what a comments table would need.
+  </p>
+</Base>

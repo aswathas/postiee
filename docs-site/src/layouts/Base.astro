@@ -1,0 +1,85 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+
+const nav = [
+  { href: '/', label: 'Home' },
+  { href: '/docs', label: 'Docs' },
+  { href: '/features', label: 'Features' },
+  { href: '/how-it-works', label: 'How it works' },
+  { href: '/about', label: 'About' },
+];
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isActive = (href: string) =>
+  path === href || (href !== '/' && path.startsWith(href));
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- width=device-width with initial-scale=1: never disable zoom -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} · postiee</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={`${title} · postiee`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site">
+      <div class="wrap">
+        <a class="brand" href="/">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none">
+            <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.8" />
+            <path d="M6 10v4M9.5 10v4M13 10h4M13 14h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+          postiee
+        </a>
+
+        <nav class="site" aria-label="Main">
+          <ul>
+            {nav.map((item) => (
+              <li>
+                <a
+                  href={item.href}
+                  aria-current={isActive(item.href) ? 'page' : undefined}
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <div class="wrap">
+        <slot />
+      </div>
+    </main>
+
+    <footer class="site">
+      <div class="wrap">
+        <p>
+          postiee — post to LinkedIn from your terminal, and search your own
+          history.
+          <a href="https://github.com/aswathas/postiee">Source</a> ·
+          Built by <a href="https://github.com/aswathas">Aswath AS</a>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
