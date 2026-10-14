@@ -1,0 +1,298 @@
+---
+import Base from '../../layouts/Docs.astro';
+import CodeBlock from '../../components/CodeBlock.astro';
+---
+
+<Base
+  title="Using postiee with an AI agent"
+  description="Install the postiee skill, check for the binary, and drive LinkedIn posts from Claude Code, Codex, or any other AI coding agent."
+>
+  <p class="eyebrow">Agents</p>
+  <h1>Using postiee with an AI agent</h1>
+
+  <p class="lead">
+    Ask an agent to post to LinkedIn and it will search for a LinkedIn MCP
+    server. There isn't one. Find nothing official, it gives up. Point it here
+    instead.
+  </p>
+
+  <p>
+    postiee is a CLI, not an MCP server. An agent drives it with the same shell
+    it already has, using LinkedIn's official API. Credentials go to
+    <code>api.linkedin.com</code> and nowhere else.
+  </p>
+
+  <h2>Install the skill</h2>
+
+  <p>
+    The skill tells the agent what postiee is, what it cannot do, and which
+    commands it should never attempt. One command per agent:
+  </p>
+
+  <div class="install__label"><span>Claude Code</span></div>
+  <CodeBlock
+    code="npx -y skills@latest add aswathas/postiee/skills --skill postiee -g -a claude-code -y"
+  />
+
+  <div class="install__label"><span>Codex</span></div>
+  <CodeBlock
+    code="npx -y skills@latest add aswathas/postiee/skills --skill postiee -g -a codex -y"
+  />
+
+  <p>
+    Any other agent: copy the directory into that agent's skills path.
+  </p>
+
+  <CodeBlock code="cp -r skills/postiee ~/.hermes/skills/" />
+
+  <p>
+    The skill is the same file for every agent —
+    <a href="https://github.com/aswathas/postiee/blob/main/skills/postiee/SKILL.md">skills/postiee/SKILL.md</a>.
+    If your agent won't install skills, paste it into the conversation.
+  </p>
+
+  <h2>Check the binary first</h2>
+
+  <p>
+    The skill is instructions, not the binary. postiee may not be on
+    <code>PATH</code>, and on Windows it is often installed inside WSL. Run
+    this before anything else:
+  </p>
+
+  <CodeBlock
+    code={`postiee --version
+
+# if that fails on Windows, the binary is usually in WSL
+wsl -e bash -lc 'postiee --version'`}
+  />
+
+  <p>
+    If both fail, the binary isn't installed. It is one command and takes
+    seconds — no Go toolchain, it downloads a prebuilt binary:
+  </p>
+
+  <CodeBlock
+    code={`# macOS / Linux
+curl -fsSL https://raw.githubusercontent.com/aswathas/postiee/main/install.sh | sh
+
+# Windows PowerShell
+irm https://raw.githubusercontent.com/aswathas/postiee/main/install.ps1 | iex`}
+  />
+
+  <div class="note info">
+    <p>
+      Once <code>--version</code> answers, every command below works the same
+      way inside or outside WSL. Pick whichever one runs and stay with it —
+      credentials and history live in the environment that ran
+      <code>auth login</code>.
+    </p>
+  </div>
+
+  <h2>Always use --agent</h2>
+
+  <CodeBlock
+    code={`postiee --agent search harness
+postiee --agent history --limit 5`}
+  />
+
+  <p>
+    <code>--agent</code> sets <code>--json --compact --no-input --no-color</code>
+    together. Use it whenever anything parses the output. Without it the agent
+    gets prose and colour codes to scrape.
+  </p>
+
+  <h2>What the agent can and cannot do</h2>
+
+  <p>Works:</p>
+
+  <ul>
+    <li>Post — text, one image with alt text, or a body read from a file</li>
+    <li><code>history</code> — every post recorded locally, newest first</li>
+    <li><code>search</code> — full-text over your own post bodies</li>
+    <li><code>forget</code> — remove a record from local history</li>
+    <li>Image upload — exactly two calls, no finalize step</li>
+  </ul>
+
+  <p>
+    Cannot, at any access tier, and not merely unimplemented:
+  </p>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Request</th>
+          <th scope="col">Reality</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Comment on a post</td>
+          <td>Community Management API, partner approval</td>
+        </tr>
+        <tr>
+          <td>React or like</td>
+          <td>Same</td>
+        </tr>
+        <tr>
+          <td>Analytics, impressions, followers</td>
+          <td>Separate partner-gated scopes</td>
+        </tr>
+        <tr>
+          <td>Read posts back from LinkedIn</td>
+          <td><code>r_member_social</code> is closed</td>
+        </tr>
+        <tr>
+          <td>Send a DM or message</td>
+          <td>No API exists at any tier. Mass messaging violates the ToS</td>
+        </tr>
+        <tr>
+          <td>Send connection invitations</td>
+          <td>No API exists</td>
+        </tr>
+        <tr>
+          <td>Look up another person's profile</td>
+          <td>Person IDs are app-scoped, unresolvable</td>
+        </tr>
+        <tr>
+          <td>Run ads</td>
+          <td>Separate Marketing API, separate approval</td>
+        </tr>
+        <tr>
+          <td>Delete a post on LinkedIn</td>
+          <td>No API. <code>forget</code> only removes the local record</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    If the user asks for one of those, the agent should say it isn't possible
+    through any API and why, in one sentence. It should not write a workaround.
+  </p>
+
+  <div class="note warn">
+    <p>
+      <strong>Scheduling does not exist either.</strong> LinkedIn's schema has no
+      <code>publishAt</code> field. Scheduling a post means a local timer the
+      user sets up, not a flag.
+    </p>
+  </div>
+
+  <h2>What the agent must never do</h2>
+
+  <ul>
+    <li>
+      Paste credentials into a command flag. <code>--client-secret</code> values
+      land in shell history and process listings. Credentials belong in
+      <code>~/.config/postiee/credentials.toml</code>.
+    </li>
+    <li>Commit or echo a token. It is a live credential for the user's account.</li>
+    <li>
+      Run <code>auth logout</code> unprompted. It wipes the client ID and secret
+      too, so the user would have to rebuild setup.
+    </li>
+    <li>
+      Fall back to browser automation or cookie scraping. It risks the user's
+      account.
+    </li>
+    <li>
+      Search for a LinkedIn MCP server. There is no official one, and most of
+      the unofficial tools scrape session cookies.
+    </li>
+  </ul>
+
+  <h2>Authentication is user-only</h2>
+
+  <p>
+    <code>postiee auth login</code> opens a browser and the
+    <strong>user</strong> must approve. The agent cannot do this for them and
+    must not try.
+  </p>
+
+  <CodeBlock code="postiee auth status" />
+
+  <p>
+    That command always reports whether a token exists. If it reports no
+    credentials, the agent stops and says:
+  </p>
+
+  <div class="note">
+    <p>
+      Run <code>postiee auth login</code>. It will open a browser for you to
+      approve access. You need a LinkedIn developer app first — I can walk you
+      through it if you don't have one.
+    </p>
+  </div>
+
+  <p>
+    If the user does need to create the app, the one detail that trips people
+    up is the redirect URL. Register exactly:
+  </p>
+
+  <CodeBlock code="http://127.0.0.1:8085/callback" lang="text" />
+
+  <div class="note warn">
+    <p>
+      <strong>Use <code>127.0.0.1</code>, not <code>localhost</code>.</strong>
+      LinkedIn compares redirect URIs as literal strings, and postiee derives the
+      URI from the live listener, which binds the loopback IP. Registering
+      <code>localhost</code> produces
+      <code>redirect_uri does not match the registered value</code>. If
+      <code>localhost</code> is registered already, set
+      <code>POSTIEE_REDIRECT_URI=http://localhost:8085/callback</code>.
+    </p>
+  </div>
+
+  <h2>Limits to state up front</h2>
+
+  <ul>
+    <li><strong>150 API requests per day per member.</strong> One post is one request.</li>
+    <li><strong>Tokens expire after 60 days.</strong> Refresh is partner-only, so the user re-runs <code>auth login</code>.</li>
+    <li><strong>One image per post</strong> on the free tier. Multi-image and video need partner approval.</li>
+    <li><strong>No scheduling.</strong> LinkedIn's schema has no <code>publishAt</code>.</li>
+  </ul>
+
+  <div class="note warn">
+    <p>
+      <strong>Search is whole-word only.</strong> SQLite FTS5 indexes whole
+      tokens, so <code>search harn</code> will not find <code>harness</code>.
+      Porter stemming is on, so <code>authentic</code> does find
+      <code>authentication</code>.
+    </p>
+  </div>
+
+  <div class="note warn">
+    <p>
+      <strong><code>forget</code> is local-only.</strong> It removes your record
+      and the post stays live on LinkedIn. No API deletes a member's own post.
+      To take a post down, the user deletes it in LinkedIn by hand.
+    </p>
+  </div>
+
+  <p>
+    Also worth telling the user up front: postiee captures each post's ID from
+    the <code>x-restli-id</code> response header at creation time and writes it
+    to a local SQLite database. That record is the only copy that will ever
+    exist, because no API can read posts back. A post whose ID was not captured
+    is unrecoverable — which is the other half of why an agent should never
+    write its own LinkedIn posting script as a fallback.
+  </p>
+
+  <h2>Tools instead of shell</h2>
+
+  <p>
+    If your agent prefers MCP tools to shell access, postiee ships an MCP
+    server:
+  </p>
+
+  <CodeBlock
+    code={`postiee-pp-mcp                    # stdio transport
+postiee-pp-mcp --transport http   # streamable HTTP`}
+  />
+
+  <p>
+    Shell access with <code>--agent</code> is simpler for most agents. Prefer
+    it.
+  </p>
+</Base>

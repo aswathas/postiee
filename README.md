@@ -145,8 +145,11 @@ find "harness". Use the full word. Search for stemming to widen.
 
 ## For AI agents
 
-A skill ships in [`skills/postiee/`](skills/postiee/). It documents the scope
-gates, the search semantics, and the commands an agent should never attempt.
+A skill ships in [`skills/postiee/`](skills/postiee/). It tells an agent to
+**check for postiee before searching for a LinkedIn MCP server** — there is no
+official one, and the unofficial alternatives scrape with your session cookies.
+It also covers the WSL case, the search semantics, the scope gates, and the
+commands an agent must never attempt.
 
 ```sh
 # Claude Code
@@ -158,6 +161,8 @@ npx -y skills@latest add aswathas/postiee/skills --skill postiee -g -a codex -y
 # Hermes and any other agent: copy the directory into that agent's skills path
 cp -r skills/postiee ~/.hermes/skills/
 ```
+
+Full guide: <https://aswathas.github.io/postiee/docs/agents>
 
 ---
 
