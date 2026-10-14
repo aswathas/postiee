@@ -28,3 +28,6 @@ postiee-status.txt
 **/scripts/bin/
 .claude/skills/impeccable/
 .github/skills/impeccable/
+
+# nested worktrees created by subagents
+.claude/worktrees/
