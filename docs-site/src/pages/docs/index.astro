@@ -1,0 +1,205 @@
+---
+import Base from '../../layouts/Docs.astro';
+import CodeBlock from '../../components/CodeBlock.astro';
+---
+
+<Base
+  title="Install and set up"
+  description="Install postiee, create your own LinkedIn app, store credentials, and log in. Ten minutes the first time."
+>
+  <p class="eyebrow">Getting started</p>
+  <h1>Install and set up</h1>
+
+  <p class="lead">
+    Ten minutes the first time, because you have to create your own LinkedIn
+    app. Every step after that is one command.
+  </p>
+
+  <h2>1. Install</h2>
+
+  <p>
+    The installers detect your OS and CPU, prefer a per-user location so you
+    don't need admin rights, and warn you if the install directory isn't on your
+    <code>PATH</code>.
+  </p>
+
+  <CodeBlock
+    label="macOS · Linux"
+    code="curl -fsSL https://raw.githubusercontent.com/aswathas/postiee/main/install.sh | sh"
+  />
+  <CodeBlock
+    label="Windows · PowerShell"
+    code="irm https://raw.githubusercontent.com/aswathas/postiee/main/install.ps1 | iex"
+  />
+
+  <h3>From source</h3>
+
+  <p>Needs Go 1.26.9 or newer.</p>
+
+  <CodeBlock
+    code={`git clone https://github.com/aswathas/postiee.git
+cd postiee
+go build -o postiee ./cmd/postiee
+sudo mv postiee /usr/local/bin/`}
+  />
+
+  <div class="note info">
+    <p>
+      <strong>No Go toolchain needed</strong> for the one-liners — those download
+      a prebuilt binary for your platform.
+    </p>
+  </div>
+
+  <h2>2. Create your LinkedIn app</h2>
+
+  <p>
+    There is no shared client ID. Every person needs their own app, because
+    LinkedIn scopes are granted per application.
+  </p>
+
+  <ol>
+    <li>
+      Go to
+      <a href="https://www.linkedin.com/developers/apps">linkedin.com/developers/apps</a>
+      and click <strong>Create app</strong>.
+    </li>
+    <li>
+      <strong>Products</strong> tab → add <strong>Share on LinkedIn</strong>.
+      This grants <code>w_member_social</code>. Self-serve, no review.
+    </li>
+    <li>
+      <strong>Products</strong> tab → add <strong>Sign In with LinkedIn</strong>.
+      This grants <code>openid</code> and <code>profile</code>, which is what
+      lets postiee resolve your own member ID at runtime.
+    </li>
+    <li>
+      <strong>Auth</strong> tab → add this exact redirect URL:
+    </li>
+  </ol>
+
+  <pre><code>http://localhost:8085/callback</code></pre>
+
+  <div class="note warn">
+    <p>
+      <strong>LinkedIn matches redirect URLs as exact strings.</strong> If you
+      registered <code>localhost</code> and postiee sends <code>127.0.0.1</code>,
+      login fails with <em>"redirect_uri does not match the registered value"</em>.
+      Register the value above exactly, or set
+      <code>POSTIEE_REDIRECT_URI</code> to match whatever you registered.
+    </p>
+  </div>
+
+  <p>
+    Back on the <strong>Settings</strong> tab you'll see a <strong>Client ID</strong>
+    and <strong>Client secret</strong>. You need both.
+  </p>
+
+  <div class="note warn">
+    <p>
+      <strong>Never paste either value into a chat, an issue, or a commit.</strong>
+      The secret is a password for your app. The next step puts them in a local
+      file that nothing else can read.
+    </p>
+  </div>
+
+  <h2>3. Store your credentials</h2>
+
+  <p>
+    Write them to a file rather than passing them as flags — a flag value lands
+    in your shell history and in process listings.
+  </p>
+
+  <CodeBlock
+    code={`mkdir -p ~/.config/postiee
+chmod 700 ~/.config/postiee
+
+cat > ~/.config/postiee/credentials.toml <<'EOF'
+client_id = "your_client_id"
+client_secret = "your_client_secret"
+EOF
+
+chmod 600 ~/.config/postiee/credentials.toml`}
+  />
+
+  <p>
+    On Windows the same file lives at
+    <code>%USERPROFILE%\.config\postiee\credentials.toml</code>.
+  </p>
+
+  <h2>4. Log in</h2>
+
+  <CodeBlock code="postiee auth login --port 8085" />
+
+  <p>
+    Your browser opens, you approve, and the token is stored. The window stays
+    open for 15 minutes, which is enough for a password, a 2FA prompt, and an
+    email code.
+  </p>
+
+  <div class="note">
+    <p>
+      <strong>Token life is 60 days.</strong> Programmatic refresh is reserved
+      for LinkedIn partners, so after expiry you re-run <code>auth login</code>.
+      If you're still signed in to LinkedIn, the consent screen is skipped.
+    </p>
+  </div>
+
+  <h2>5. Check it works</h2>
+
+  <CodeBlock
+    code={`postiee doctor
+postiee auth status
+postiee userinfo`}
+  />
+
+  <p>
+    <code>doctor</code> checks your config, your credentials, and that
+    <code>api.linkedin.com</code> is reachable. <code>userinfo</code> calls
+    LinkedIn and prints your name — if that works, your token is real.
+  </p>
+
+  <h2>Where your files live</h2>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">What</th>
+          <th scope="col">macOS / Linux</th>
+          <th scope="col">Windows</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Credentials</td>
+          <td><code>~/.config/postiee/</code></td>
+          <td><code>%USERPROFILE%\.config\postiee\</code></td>
+        </tr>
+        <tr>
+          <td>Token</td>
+          <td><code>~/.local/share/postiee/</code></td>
+          <td><code>%LOCALAPPDATA%\postiee\</code></td>
+        </tr>
+        <tr>
+          <td>History</td>
+          <td><code>~/.config/postiee/history.db</code></td>
+          <td><code>%USERPROFILE%\.config\postiee\history.db</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    Note that the token file and the credentials file have the same name but
+    live in different directories. Your app credentials are the one you wrote
+    by hand; the token store is written for you after login.
+  </p>
+
+  <h2>Next</h2>
+
+  <p>
+    <a href="/postiee/docs/commands">Commands</a> — every command and flag, or
+    the <a href="/postiee/docs/limits">limits page</a> to find out what this
+    can't do before you rely on it.
+  </p>
+</Base>

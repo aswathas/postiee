@@ -1,0 +1,188 @@
+---
+import Base from '../../layouts/Docs.astro';
+import CodeBlock from '../../components/CodeBlock.astro';
+---
+
+<Base
+  title="Commands"
+  description="Every postiee command with its flags, plus the environment variables that override defaults."
+>
+  <p class="eyebrow">Reference</p>
+  <h1>Commands</h1>
+
+  <p class="lead">
+    Six commands do the real work. Everything else is generated scaffolding you
+    will never need.
+  </p>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Command</th>
+          <th scope="col">What it does</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>post</code></td><td>Create a post and record it locally.</td></tr>
+        <tr><td><code>history</code></td><td>Every post recorded locally, newest first.</td></tr>
+        <tr><td><code>search</code></td><td>Full-text search over your own post bodies.</td></tr>
+        <tr><td><code>forget</code></td><td>Remove a post from your local history.</td></tr>
+        <tr><td><code>images</code></td><td>Upload an image and return the URN to attach.</td></tr>
+        <tr><td><code>auth</code></td><td>Login, logout, status.</td></tr>
+        <tr><td><code>doctor</code></td><td>Config, credential, and connectivity check.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>post</h2>
+
+  <CodeBlock
+    code={`postiee post "some text"
+postiee post --file post.md
+postiee post "with a picture" --image chart.png --alt "a line chart"
+postiee post "connections only" -v CONNECTIONS`}
+  />
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th scope="col">Flag</th><th scope="col">Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>--file</code></td><td>Read the body from a file. Avoids shell quoting entirely.</td></tr>
+        <tr><td><code>--image</code></td><td>Attach one image.</td></tr>
+        <tr><td><code>--alt</code></td><td>Alt text for that image.</td></tr>
+        <tr><td><code>-v</code></td><td><code>PUBLIC</code>, <code>CONNECTIONS</code>, or <code>LOGGED_IN</code>. Defaults to <code>PUBLIC</code>.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <p>
+      Prefer <code>--file</code> for anything long. Quoting a multi-line post
+      through a shell is how you end up with mangled apostrophes.
+    </p>
+  </div>
+
+  <h2>history</h2>
+
+  <CodeBlock code={`postiee history
+postiee history --limit 200`} />
+
+  <h2>search</h2>
+
+  <CodeBlock
+    code={`postiee search harness
+postiee search "harness agent" --json`}
+  />
+
+  <p>
+    Terms are ANDed, so more words narrow the result. Porter stemming is on —
+    <code>authentic</code> finds <code>authentication</code>.
+  </p>
+
+  <div class="note warn">
+    <p>
+      <strong>Partial-word prefixes do not work.</strong> SQLite FTS5 indexes
+      whole tokens, so <code>postiee search harn</code> will not find
+      <code>harness</code>. Use the full word.
+    </p>
+  </div>
+
+  <h2>forget</h2>
+
+  <CodeBlock code="postiee forget urn:li:ugcPost:12345" />
+
+  <p>
+    Removes the post from your local history and from the search index. It does
+    <strong>not</strong> delete anything on LinkedIn — that permission doesn't
+    exist.
+  </p>
+
+  <h2>auth and doctor</h2>
+
+  <CodeBlock
+    code={`postiee auth login --port 8085
+postiee auth status
+postiee auth logout
+postiee doctor`}
+  />
+
+  <h2>Agent mode</h2>
+
+  <CodeBlock code="postiee --agent search harness" />
+
+  <p>
+    Sets <code>--json --compact --no-input --no-color</code> together. Use it
+    whenever anything is parsing the output.
+  </p>
+
+  <h2>Environment variables</h2>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th scope="col">Variable</th><th scope="col">Effect</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>POSTIEE_SCOPES</code></td>
+          <td>Override the requested OAuth scopes. Useful during setup if Sign In with LinkedIn isn't added yet.</td>
+        </tr>
+        <tr>
+          <td><code>POSTIEE_REDIRECT_URI</code></td>
+          <td>Override the redirect host spelling. Must match your app's registration exactly.</td>
+        </tr>
+        <tr>
+          <td><code>POSTIEE_TOKEN</code></td>
+          <td>Use a specific access token instead of the stored one.</td>
+        </tr>
+        <tr>
+          <td><code>POSTIEE_HISTORY_DB</code></td>
+          <td>Point the history database somewhere else.</td>
+        </tr>
+        <tr>
+          <td><code>POSTIEE_CONFIG</code></td>
+          <td>Use a specific config file instead of the default location.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Troubleshooting</h2>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th scope="col">Error</th><th scope="col">Fix</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>unauthorized_scope_error</code></td>
+          <td>A requested scope isn't granted to your app. Add the product, or narrow the request with <code>POSTIEE_SCOPES</code>.</td>
+        </tr>
+        <tr>
+          <td><code>redirect_uri does not match</code></td>
+          <td>Set <code>POSTIEE_REDIRECT_URI</code> to exactly what your Auth tab shows.</td>
+        </tr>
+        <tr>
+          <td><code>403 … userinfo</code></td>
+          <td><code>openid</code> isn't active yet. Add Sign In with LinkedIn, wait about an hour, then <code>auth logout</code> and log in again.</td>
+        </tr>
+        <tr>
+          <td><code>422 … /author</code></td>
+          <td>Your app lacks <code>openid</code>, so the member URN can't be resolved.</td>
+        </tr>
+        <tr>
+          <td><code>state mismatch</code></td>
+          <td>An old login tab was used. Start <code>auth login</code> again and click the fresh URL it prints.</td>
+        </tr>
+        <tr>
+          <td>Search returns nothing</td>
+          <td>You searched a partial word. FTS5 matches whole tokens only — try <code>harness</code>, not <code>harn</code>.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</Base>

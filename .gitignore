@@ -23,3 +23,8 @@ node_modules/
 # local scratch
 .msg.txt
 postiee-status.txt
+
+# impeccable: 19MB platform binary, reinstalled by `npx impeccable install`
+**/scripts/bin/
+.claude/skills/impeccable/
+.github/skills/impeccable/

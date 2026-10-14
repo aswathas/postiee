@@ -1,0 +1,35 @@
+---
+/**
+ * The scope panel. This is the pitch: naming what the tool cannot do, up
+ * front, is both the honesty the product is built on and the argument for why
+ * it exists. Colour is never the only signal — every row carries a word.
+ */
+const rows = [
+  { name: 'post', why: 'self-serve', tone: 'ok' },
+  { name: 'history', why: 'local', tone: 'ok' },
+  { name: 'search', why: 'local', tone: 'ok' },
+  { name: 'comments', why: 'partner only', tone: 'mid' },
+  { name: 'analytics', why: 'partner only', tone: 'mid' },
+  { name: 'read posts back', why: 'closed', tone: 'no' },
+  { name: 'messages / DMs', why: 'no API', tone: 'no' },
+  { name: 'invitations', why: 'no API', tone: 'no' },
+  { name: 'ads', why: 'separate product', tone: 'no' },
+];
+---
+
+<div class="scope">
+  <p class="scope__head">
+    <span>Capability</span>
+    <span>Status</span>
+  </p>
+
+  {
+    rows.map((row) => (
+      <div class="scope__row">
+        <span class={`dot dot--${row.tone}`} aria-hidden="true" />
+        <span class="scope__name">{row.name}</span>
+        <span class="scope__why">{row.why}</span>
+      </div>
+    ))
+  }
+</div>

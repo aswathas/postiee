@@ -1,145 +1,160 @@
 ---
 import Base from '../layouts/Base.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+import Terminal from '../components/Terminal.astro';
+import ScopePanel from '../components/ScopePanel.astro';
 import PostLifecycle from '../components/PostLifecycle.astro';
+
+const rawBase = import.meta.env.BASE_URL;
+const u = (p: string) => `${rawBase.replace(/\/$/, '')}/${p.replace(/^\//, '')}`;
 ---
 
 <Base
   title="Post to LinkedIn from your terminal"
-  description="postiee posts to LinkedIn's official API and keeps a searchable local history, because LinkedIn will not let any API read your posts back."
+  description="postiee posts to LinkedIn from your terminal and keeps a searchable record of everything you posted, because LinkedIn will not let any API read your posts back."
 >
-  <p class="eyebrow">LinkedIn CLI for people who use terminals</p>
-  <h1>Post to LinkedIn. Search your own history.</h1>
+  <section class="hero">
+    <p class="hero__eyebrow">postiee</p>
+    <h1>Post to LinkedIn.<br /><em>Find it again later.</em></h1>
+    <p class="hero__sub">
+      Post from your terminal. Keep a searchable copy of everything you wrote,
+      because LinkedIn won't let any API read your posts back.
+    </p>
 
-  <p class="lead">
-    LinkedIn's permission to read your own posts is
-    <strong>closed to every applicant</strong> — not slow, not paid, closed.
-    postiee captures the post ID the moment it is created and keeps a local,
-    full-text-searchable record, because that record is the only copy that will
-    ever exist.
-  </p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href={u('/docs')}>Get started</a>
+      <a class="btn btn--ghost" href="https://github.com/aswathas/postiee" rel="noopener">
+        View source
+      </a>
+    </div>
 
-  <p>
-    <a class="cta" href="https://github.com/aswathas/postiee">Get it on GitHub</a>
-    <a class="cta secondary" href="/postiee/docs">Read the docs</a>
-  </p>
+    <div class="stage reveal">
+      <Terminal />
+      <ScopePanel />
+    </div>
 
-  <h2>Install</h2>
+    <div class="strip">
+      <span>search <b>144 µs</b> / 1k posts</span>
+      <span>record <b>1.45 ms</b></span>
+      <span>limit <b>150 posts/day</b></span>
+      <span>token <b>60 days</b></span>
+    </div>
 
-  <p><strong>macOS and Linux</strong></p>
-  <pre><code>curl -fsSL https://raw.githubusercontent.com/aswathas/postiee/main/install.sh | sh</code></pre>
+    <div class="install">
+      <p class="install__label">macOS · Linux</p>
+      <CodeBlock
+        code="curl -fsSL https://raw.githubusercontent.com/aswathas/postiee/main/install.sh | sh"
+      />
+      <p class="install__label">Windows · PowerShell</p>
+      <CodeBlock
+        code="irm https://raw.githubusercontent.com/aswathas/postiee/main/install.ps1 | iex"
+      />
+    </div>
+  </section>
 
-  <p><strong>Windows (PowerShell)</strong></p>
-  <pre><code>irm https://raw.githubusercontent.com/aswathas/postiee/main/install.ps1 | iex</code></pre>
+  <section class="section section--alt">
+    <div class="section__head reveal">
+      <h2>Read that table again</h2>
+      <p>Most of it is red. That isn't a gap in the product — it's the reason the product is this shape.</p>
+    </div>
 
-  <p>
-    No Go toolchain needed — those download a prebuilt binary. Full setup,
-    including the LinkedIn app you need to create, is on the
-    <a href="/postiee/docs">docs page</a>.
-  </p>
-
-  <h2>Use it</h2>
-
-  <pre><code># post something
-$ postiee post "shipped a new feature today"
-
-# with an image
-$ postiee post "our signup curve" --image chart.png --alt "signups by week"
-
-# find something you posted months ago
-$ postiee search harness
-
-# everything you've posted, newest first
-$ postiee history</code></pre>
-
-  <h2>What it does, and what it cannot</h2>
-
-  <div class="grid">
-    <div class="card">
-      <p><span class="badge ok">works</span></p>
+    <div class="prose" style="max-width: 42rem; margin-inline: auto; padding-inline: 0;">
       <p>
-        <strong>Post</strong> text, one image, or a file. Public, connections,
-        or logged-in visibility.
+        LinkedIn has a permission whose entire job is letting an app read your
+        own posts. It isn't slow. It isn't paid. It is <strong>closed</strong> —
+        the documentation says it is not accepting access requests at all.
+      </p>
+      <p>
+        So you can write to LinkedIn through an approved app, but nothing can
+        read back what it wrote. Post something, lose the identifier, and that
+        post is gone. Not hidden. Gone.
+      </p>
+      <p>
+        That is why postiee captures the identifier the moment a post is created
+        and keeps the record itself. The local history isn't a bonus feature.
+        It's the only copy that will ever exist.
+      </p>
+      <p>
+        Everything green in that table is inside the self-serve tier. Everything
+        amber or red is either partner-gated or does not exist at any tier. The
+        <a href={u('/docs/limits')}>full breakdown is here</a>.
       </p>
     </div>
-    <div class="card">
-      <p><span class="badge ok">works</span></p>
+  </section>
+
+  <section class="section">
+    <div class="section__head reveal">
+      <h2>What it does</h2>
+      <p>Four things. No half-finished commands, no stubs that fail on first use.</p>
+    </div>
+
+    <div class="cards">
+      <div class="card reveal">
+        <h3>post</h3>
+        <p>Write a thought, attach one image, choose who can see it.</p>
+      </div>
+      <div class="card reveal">
+        <h3>history</h3>
+        <p>Every post written to your own database the moment it's made.</p>
+      </div>
+      <div class="card reveal">
+        <h3>search</h3>
+        <p>Find that thing you posted in March without scrolling LinkedIn.</p>
+      </div>
+      <div class="card reveal">
+        <h3>forget</h3>
+        <p>Drop a post from your history whenever you want it gone.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt">
+    <div class="section__head reveal">
+      <h2>The three traps</h2>
+      <p>Every one of these breaks a naive LinkedIn client, and all three fail silently.</p>
+    </div>
+
+    <div style="max-width: 46rem; margin-inline: auto;">
+      <PostLifecycle />
+    </div>
+
+    <div class="prose" style="max-width: 42rem; margin-inline: auto; padding-inline: 0;">
       <p>
-        <strong>Search</strong> your own posts with stemming and multi-term
-        queries. 145&nbsp;µs across 1,000 posts.
+        The post ID arrives in a response header while the body is empty. Person
+        IDs are scoped per app, so yours must be resolved at runtime. And URNs in
+        paths need full percent-encoding, which Go's <code>PathEscape</code> does
+        not do. postiee handles all three, and each has a test.
+        <a href={u('/docs/how-it-works')}>How it works</a> walks through them.
       </p>
     </div>
-    <div class="card">
-      <p><span class="badge no">impossible</span></p>
+  </section>
+
+  <section class="section">
+    <div class="section__head reveal">
+      <h2>Your agent already knows how</h2>
+      <p>Any agent that can run a shell command can drive it.</p>
+    </div>
+
+    <div class="prose" style="max-width: 42rem; margin-inline: auto; padding-inline: 0;">
       <p>
-        <strong>Comments, reactions, analytics</strong> — need LinkedIn partner
-        approval this project does not have.
+        There's an <code>--agent</code> flag that switches every command to
+        clean JSON, an MCP server, and an installable skill for Claude, Codex,
+        and Cursor. Point it at whatever you already use and posting stops being
+        a separate chore.
       </p>
     </div>
-    <div class="card">
-      <p><span class="badge no">impossible</span></p>
-      <p>
-        <strong>Messaging, invitations</strong> — no public LinkedIn API exists
-        at any access tier.
-      </p>
+
+    <div style="max-width: 34rem; margin: 1.5rem auto 0;">
+      <CodeBlock code={'postiee post "what I built this week" --image chart.png --alt "signups by week"'} />
     </div>
-  </div>
+  </section>
 
-  <p class="note">
-    Those limits are not oversights. They are why this tool is small and why the
-    local history is the point. <a href="/postiee/features">See the full scope
-    breakdown</a>.
-  </p>
-
-  <h2>The whole idea, in one diagram</h2>
-
-  <figure>
-    <PostLifecycle />
-    <figcaption>
-      Every call <code>postiee post</code> makes, and the three places naive
-      LinkedIn clients break.
-    </figcaption>
-  </figure>
-
-  <h2>Fast, because there is very little to do</h2>
-
-  <table>
-    <caption class="sr-only" style="position:absolute;left:-9999px">
-      Measured operation latency
-    </caption>
-    <thead>
-      <tr>
-        <th scope="col">Operation</th>
-        <th scope="col" class="num">Latency</th>
-        <th scope="col" class="num">Allocations</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Search 1,000 posts</td>
-        <td class="num">145 µs</td>
-        <td class="num">32</td>
-      </tr>
-      <tr>
-        <td>Search 10,000 posts</td>
-        <td class="num">347 µs</td>
-        <td class="num">32</td>
-      </tr>
-      <tr>
-        <td>List history</td>
-        <td class="num">79 µs</td>
-        <td class="num">581</td>
-      </tr>
-      <tr>
-        <td>Record a post</td>
-        <td class="num">1.48 ms</td>
-        <td class="num">33</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <p>
-    Search is nearly flat in corpus size: 10× the posts costs 2.4× the latency,
-    because FTS5 queries an index rather than scanning rows. Reproduce with
-    <code>go test -bench=. -benchmem ./bench/</code>.
-  </p>
+  <section class="cta-band">
+    <h2>Start posting</h2>
+    <p>Ten minutes to set up, including your own LinkedIn app.</p>
+    <div class="hero__cta">
+      <a class="btn btn--primary" href={u('/docs')}>Read the setup guide</a>
+      <a class="btn btn--ghost" href={u('/docs/limits')}>See what it can't do</a>
+    </div>
+  </section>
 </Base>

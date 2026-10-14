@@ -1,0 +1,159 @@
+---
+import Base from '../../layouts/Docs.astro';
+import ScopeGate from '../../components/ScopeGate.astro';
+---
+
+<Base
+  title="Limits and scope"
+  description="What postiee can and cannot do, why each omission exists, and the rate limits you will actually hit."
+>
+  <p class="eyebrow">Reference</p>
+  <h1>Limits and scope</h1>
+
+  <p class="lead">
+    The list of things this can't do is longer than the list of things it can.
+    That's deliberate, and every omission has a reason.
+  </p>
+
+  <h2>The rate limit</h2>
+
+  <p>
+    <strong>150 requests per day, per member.</strong> One post is one request.
+    Nothing you do through postiee is pooled with anyone else's — the limit is
+    yours alone.
+  </p>
+
+  <p>
+    A script that loops will hit it, and the failure looks like an unrelated
+    error rather than a limit. Search and history are local and cost nothing
+    against this budget.
+  </p>
+
+  <h2>Token life</h2>
+
+  <p>
+    Access tokens last <strong>60 days</strong>. Refreshing them automatically
+    is reserved for LinkedIn partners, so you re-run <code>auth login</code>.
+    If you're still signed in, the consent screen is skipped and it takes
+    seconds.
+  </p>
+
+  <h2>What postiee can't do</h2>
+
+  <figure>
+    <ScopeGate />
+    <figcaption>
+      Three tiers. postiee operates entirely inside the first.
+    </figcaption>
+  </figure>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th scope="col">Capability</th><th scope="col">Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Comments</td>
+          <td><span class="badge mid">partner approval</span> Needs the Community Management API.</td>
+        </tr>
+        <tr>
+          <td>Reactions and likes</td>
+          <td><span class="badge mid">partner approval</span> Same.</td>
+        </tr>
+        <tr>
+          <td>Analytics — impressions, followers, profile views</td>
+          <td><span class="badge mid">partner approval</span> Separate member analytics scopes.</td>
+        </tr>
+        <tr>
+          <td>Reading your own posts back</td>
+          <td><span class="badge no">closed</span> <code>r_member_social</code> isn't accepting requests.</td>
+        </tr>
+        <tr>
+          <td>Reading who reacted to a post</td>
+          <td><span class="badge no">closed</span> Reaction identities are never returned to a member app.</td>
+        </tr>
+        <tr>
+          <td>Messaging and DMs</td>
+          <td><span class="badge no">no API exists</span> No endpoint in the docs. Mass messaging is an explicit prohibited use.</td>
+        </tr>
+        <tr>
+          <td>Connection invitations</td>
+          <td><span class="badge no">no API exists</span> Same.</td>
+        </tr>
+        <tr>
+          <td>Looking up another member's profile</td>
+          <td><span class="badge no">no API exists</span> Person IDs are app-scoped, so there's no way to resolve someone else's.</td>
+        </tr>
+        <tr>
+          <td>Running ads</td>
+          <td><span class="badge no">separate product</span> The Marketing API is a different platform with its own approval.</td>
+        </tr>
+        <tr>
+          <td>Deleting a post on LinkedIn</td>
+          <td><span class="badge no">no API exists</span> <code>forget</code> removes your local record only.</td>
+        </tr>
+        <tr>
+          <td>Scheduled posts</td>
+          <td><span class="badge mid">client-side only</span> No <code>publishAt</code> field exists. Scheduling means a local timer.</td>
+        </tr>
+        <tr>
+          <td>Multi-image and video posts</td>
+          <td><span class="badge mid">partner approval</span> Single image works self-serve; the rest don't.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Why so many omissions</h2>
+
+  <p>
+    LinkedIn's API is not designed for individuals posting to their own feed. It's
+    designed for marketing platforms managing thousands of company pages — so
+    the surface that suits you, reading your posts, reacting to them, seeing how
+    they performed, is exactly the surface that requires becoming a vetted
+    partner.
+  </p>
+
+  <p>
+    Shipping stubs for those would be worse than silence. A <code>comment</code>
+    command that 403s on first use teaches you nothing and wastes your time; an
+    absent command tells you the truth immediately. So the tool ships only what
+    genuinely works, and this page says plainly why the rest is out of reach.
+  </p>
+
+  <div class="note info">
+    <p>
+      <strong>If LinkedIn ever opens one of these</strong>, the architecture will
+      take it. The local history already stores what a comments table would need
+      — the post URN is the join key.
+    </p>
+  </div>
+
+  <h2>What is guaranteed to keep working</h2>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th scope="col">Property</th><th scope="col">Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Porter stemming — <code>authentic</code> finds <code>authentication</code></td><td><span class="badge ok">pass</span></td></tr>
+        <tr><td>Multi-term AND narrows rather than widens</td><td><span class="badge ok">pass</span></td></tr>
+        <tr><td>An absent term returns nothing</td><td><span class="badge ok">pass</span></td></tr>
+        <tr><td>Junk input never errors — <code>"</code>, <code>AND</code>, <code>()</code>, <code>NEAR(a b)</code>, <code>--</code></td><td><span class="badge ok">pass</span></td></tr>
+        <tr><td>Re-recording a post upserts instead of duplicating</td><td><span class="badge ok">pass</span></td></tr>
+        <tr><td>Deleting removes the search index entry too</td><td><span class="badge ok">pass</span></td></tr>
+        <tr><td>Post ID read from the response header, not the body</td><td><span class="badge ok">pass</span></td></tr>
+        <tr><td>Image upload performs exactly two calls</td><td><span class="badge ok">pass</span></td></tr>
+        <tr><td>URNs in paths are fully percent-encoded</td><td><span class="badge ok">pass</span></td></tr>
+        <tr><td>Partial-word prefix search</td><td><span class="badge mid">not supported</span> Documented, not papered over.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    Every row is produced by a test in the repository, not asserted by hand. Run
+    <code>go test ./...</code> to confirm.
+  </p>
+</Base>

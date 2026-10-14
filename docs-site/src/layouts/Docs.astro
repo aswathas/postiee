@@ -1,0 +1,81 @@
+---
+import Base from './Base.astro';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+
+const rawBase = import.meta.env.BASE_URL;
+const base = `${rawBase.replace(/\/$/, '')}/`;
+const u = (p: string) => `${base}${p.replace(/^\//, '')}`;
+
+const path =
+  Astro.url.pathname.replace(/\/$/, '').replace(new RegExp(`^${rawBase}`), '') || '/';
+const isActive = (href: string) =>
+  path === href || (href !== '/' && path.startsWith(href));
+
+const groups = [
+  {
+    title: 'Getting started',
+    links: [
+      { href: '/docs', label: 'Install and set up' },
+      { href: '/docs/commands', label: 'Commands' },
+    ],
+  },
+  {
+    title: 'Reference',
+    links: [
+      { href: '/docs/limits', label: 'Limits and scope' },
+      { href: '/docs/how-it-works', label: 'How it works' },
+    ],
+  },
+  {
+    title: 'Project',
+    links: [{ href: '/about', label: 'About' }],
+  },
+];
+---
+
+<Base title={title} description={description} docsMenu>
+  <div class="docs">
+    <nav class="sidebar" id="sidebar" aria-label="Documentation">
+      {
+        groups.map((group) => (
+          <div class="sidebar__group">
+            <p class="sidebar__title">{group.title}</p>
+            {group.links.map((link) => (
+              <a
+                class="sidebar__link"
+                href={u(link.href)}
+                aria-current={isActive(link.href) ? 'page' : undefined}
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+        ))
+      }
+    </nav>
+
+    <div class="prose">
+      <slot />
+    </div>
+  </div>
+
+  <script>
+    const menu = document.getElementById('docsMenu');
+    const sidebar = document.getElementById('sidebar');
+    menu?.addEventListener('click', () => {
+      if (!sidebar) return;
+      const open = sidebar.hasAttribute('hidden');
+      sidebar.toggleAttribute('hidden', !open);
+      menu.setAttribute('aria-expanded', String(open));
+    });
+    if (sidebar && window.matchMedia('(max-width: 63.99rem)').matches) {
+      sidebar.setAttribute('hidden', '');
+    }
+  </script>
+</Base>

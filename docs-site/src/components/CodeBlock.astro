@@ -1,0 +1,28 @@
+---
+interface Props {
+  code: string;
+  lang?: string;
+  label?: string;
+}
+
+const { code, lang = 'bash', label } = Astro.props;
+---
+
+<div class="codeblock">
+  {
+    label && (
+      <div class="install__label">
+        <span>{label}</span>
+      </div>
+    )
+  }
+  <pre><code class={`language-${lang}`}>{code}</code></pre>
+  <button class="copy" type="button">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect>
+      <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path>
+    </svg>
+    <span class="copy__text">Copy</span>
+    <span class="sr-only">Copy code to clipboard</span>
+  </button>
+</div>
