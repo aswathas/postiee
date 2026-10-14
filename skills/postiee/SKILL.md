@@ -116,8 +116,15 @@ write a factual description of what it shows and confirm it with them.
 postiee history                    # newest first, default limit 50
 postiee search harness              # full-text over post bodies
 postiee search "harness agent"      # terms are ANDed
-postiee forget urn:li:ugcPost:12345 # remove from LOCAL history only
+postiee forget urn:li:share:12345   # remove from LOCAL history only
+postiee unpublish urn:li:share:12345 # delete on LinkedIn AND drop the local row
 ```
+
+**`forget` and `unpublish` are different.** `forget` only edits your local
+database — the post stays live on LinkedIn. `unpublish` calls LinkedIn's delete
+endpoint and then removes the local record. If the user wants the post gone
+from LinkedIn, they need `unpublish`. If they only want it out of their history,
+`forget` is enough and does not touch the network.
 
 **Search matches whole words only.** SQLite FTS5 indexes whole tokens, so
 `search harn` will NOT find `harness`. Use the full word. Porter stemming is on,
@@ -152,10 +159,33 @@ command that fails on first use teaches the user nothing.
 | Send connection invitations | No API exists |
 | Look up another person's profile | Person IDs are app-scoped, unresolvable |
 | Run ads | Separate Marketing API, separate approval |
-| Delete a post on LinkedIn | No API. `forget` only removes the local record |
 
 If the user asks for one of these, tell them it's not possible through any API
 and say why in one sentence. Do not write a workaround.
+
+## Deleting a post is possible — and irreversible
+
+An earlier version of this skill claimed deletion was impossible. That was wrong.
+It was checked against LinkedIn's Posts API reference and then verified live.
+
+- Endpoint: `DELETE /rest/posts/{encoded-urn}`
+- Permission: **`w_member_social`** — the same self-serve scope posting already
+  uses. Only *reading* posts needs the closed `r_member_social`.
+- Success is `204 No Content`, and it is idempotent: deleting an already-deleted
+  post also returns 204, so 204 alone does not prove the post was there.
+
+```sh
+postiee unpublish urn:li:share:12345
+```
+
+Rules for the agent:
+
+- **Never run `unpublish` without an explicit request naming that post.** There
+  is no undo. LinkedIn's API offers no restore.
+- Confirm the exact URN with the user first, and read it from
+  `postiee history` rather than guessing.
+- If the user wants the post gone from their history but still live on LinkedIn,
+  that is `forget`, not `unpublish`.
 
 ## Never do these
 

@@ -16,6 +16,7 @@ const rows = [
   { name: 'post', why: 'self-serve', tone: 'ok' },
   { name: 'history', why: 'local', tone: 'ok' },
   { name: 'search', why: 'local', tone: 'ok' },
+  { name: 'unpublish', why: 'self-serve', tone: 'ok' },
   { name: 'comments', why: 'partner only', tone: 'mid' },
   { name: 'analytics', why: 'partner only', tone: 'mid' },
   { name: 'read posts back', why: 'closed', tone: 'no' },
@@ -25,7 +26,7 @@ const rows = [
 ];
 
 // One delay per row: a short stagger inside a tier, a longer beat between
-// tiers, so the panel reads as three arguments rather than nine bullets.
+// tiers, so the panel reads as three arguments rather than a flat bullet list.
 const TIER = 0.5;
 const STAGGER = 0.05;
 const labelDelay = rows.map((_, i) => `${waveOf[rows[i].tone] * TIER}s`);
@@ -96,7 +97,7 @@ rows.forEach((row, i) => {
   /* Last row of a tier drops its rule so the tiers read as three blocks. */
   .scope__row.scope__row--end { border-bottom: 0; }
 
-  /* Entrance: three beats, not nine. Rows and labels are in the DOM at full
+  /* Entrance: three beats, one per tier. Rows and labels are in the DOM at full
      opacity unless this animation runs; the reduced-motion path below turns it
      off entirely and leaves everything settled and visible. */
   .scope__wave,

@@ -44,6 +44,7 @@ Works self-serve:
 - Create a post: text, one image with alt text, or a body read from a file
 - Visibility: `PUBLIC`, `CONNECTIONS`, `LOGGED_IN`
 - Local history with full-text search (SQLite FTS5, porter stemming)
+- Delete a post on LinkedIn (`unpublish`), then drop it from local history
 - OAuth login, logout, status
 - Agent surfaces: `--agent` JSON mode, MCP server, installable skill
 
@@ -61,8 +62,14 @@ Confirmed unavailable, and must never be presented as forthcoming without a Link
 - Comments, reactions, analytics — partner approval
 - Messaging, DMs, connection invitations — no public API exists at any tier
 - Running ads — separate Marketing API and approval
-- Deleting a post on LinkedIn — no API exists
-- Reading posts back from LinkedIn, or resolving another member's ID
+- Reading posts back from LinkedIn, or resolving another member's ID — partner approval
+
+Deleting a post is **not** on this list. `DELETE /rest/posts/{urn}` is available at
+the self-serve tier under `w_member_social`, which is the same scope `post`
+already uses. `postiee unpublish <urn>` deletes on LinkedIn first and removes the
+local record only after LinkedIn confirms. An earlier draft of this file and the
+`limits` page claimed deletion was impossible; that was wrong and was verified
+against the live API (HTTP 204 on delete).
 
 ## Brand Commitments
 

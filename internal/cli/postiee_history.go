@@ -72,6 +72,12 @@ func newPostieePostCmd(flags *rootFlags) *cobra.Command {
 				return fmt.Errorf("nothing to post: pass text as an argument or use --file")
 			}
 
+			// Short-circuit before any network call. Without this, --dry-run
+			// publishes a real post: CreatePost is not dry-run aware.
+			if dryRunOK(flags) {
+				return writeDryRun(cmd.OutOrStdout(), flags, "post to LinkedIn and record it in local history")
+			}
+
 			token := postieeToken()
 			if token == "" {
 				return fmt.Errorf("no access token found; run 'postiee auth login' or set POSTIEE_TOKEN")
@@ -162,7 +168,8 @@ func newPostieeHistoryCmd(flags *rootFlags) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "history",
 		Short:   "List posts recorded locally, newest first",
-		Aliases: []string{"posts"},
+		// No "posts" alias: it shadows the generated `posts` parent group and
+		// makes `posts delete` unreachable. Use `history` or `posts list`.
 		RunE: func(cmd *cobra.Command, args []string) error {
 			st, err := historyStore()
 			if err != nil {
@@ -247,6 +254,9 @@ func newPostieeForgetCmd(flags *rootFlags) *cobra.Command {
 		Short: "Remove a post from local history",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if dryRunOK(flags) {
+				return writeDryRun(cmd.OutOrStdout(), flags, "remove "+args[0]+" from local history")
+			}
 			st, err := historyStore()
 			if err != nil {
 				return err
@@ -261,6 +271,51 @@ func newPostieeForgetCmd(flags *rootFlags) *cobra.Command {
 	}
 }
 
+// newPostieeUnpublishCmd deletes a post on LinkedIn and drops it from local
+// history. `forget` only removes the local record, which leaves the post live —
+// keeping both commands means the two halves can never be confused.
+//
+// Unlike the generated `posts delete`, this takes no --authorization flag: a
+// token on the command line lands in shell history and process listings.
+func newPostieeUnpublishCmd(flags *rootFlags) *cobra.Command {
+	return &cobra.Command{
+		Use:   "unpublish <post-urn>",
+		Short: "Delete a post on LinkedIn and remove it from local history",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			urn := args[0]
+			if dryRunOK(flags) {
+				return writeDryRun(cmd.OutOrStdout(), flags, "delete "+urn+" on LinkedIn and remove it from local history")
+			}
+
+			token := postieeToken()
+			if token == "" {
+				return fmt.Errorf("no access token found; run 'postiee auth login' or set POSTIEE_TOKEN")
+			}
+			c := &postiee.Client{Token: token}
+
+			// Delete remotely first. If LinkedIn refuses, the local record stays
+			// so the post is still findable and the user can retry.
+			if err := c.DeletePost(context.Background(), urn); err != nil {
+				return err
+			}
+
+			// Remote delete succeeded, so the local row is now a lie. Drop it.
+			st, err := historyStore()
+			if err != nil {
+				return err
+			}
+			defer st.Close()
+			if err := st.Forget(context.Background(), urn); err != nil {
+				return fmt.Errorf("deleted on LinkedIn but could not remove %s from local history: %w", urn, err)
+			}
+
+			fmt.Fprintf(cmd.OutOrStdout(), "Deleted %s on LinkedIn and removed it from local history.\n", urn)
+			return nil
+		},
+	}
+}
+
 // init registers the hand-written commands through the generator's own
 // novelCommandHooks extension point, so root.go is never edited and a
 // regeneration cannot lose them.
@@ -269,6 +324,7 @@ func init() {
 		root.AddCommand(newPostieePostCmd(flags))
 		root.AddCommand(newPostieeHistoryCmd(flags))
 		root.AddCommand(newPostieeSearchCmd(flags))
+		root.AddCommand(newPostieeUnpublishCmd(flags))
 		root.AddCommand(newPostieeForgetCmd(flags))
 	})
 }

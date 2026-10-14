@@ -11,8 +11,8 @@ import CodeBlock from '../../components/CodeBlock.astro';
   <h1>Commands</h1>
 
   <p class="lead">
-    Six commands do the real work. Everything else exists because the generator
-    emitted it, and you will never need it.
+    Seven commands do the real work. Everything else exists because the
+    generator emitted it, and you will never need it.
   </p>
 
   <div class="table-scroll">
@@ -27,7 +27,8 @@ import CodeBlock from '../../components/CodeBlock.astro';
         <tr><td><code>post</code></td><td>Create a post and record it locally.</td></tr>
         <tr><td><code>history</code></td><td>Every post recorded locally, newest first.</td></tr>
         <tr><td><code>search</code></td><td>Full-text search over your own post bodies.</td></tr>
-        <tr><td><code>forget</code></td><td>Remove a post from your local history.</td></tr>
+        <tr><td><code>forget</code></td><td>Remove a post from your local history only.</td></tr>
+        <tr><td><code>unpublish</code></td><td>Delete the post on LinkedIn, then from local history. Irreversible.</td></tr>
         <tr><td><code>auth</code></td><td>Login, logout, status.</td></tr>
         <tr><td><code>doctor</code></td><td>Config, credential, and connectivity check.</td></tr>
         <tr><td><code>userinfo</code></td><td>Print your app-scoped member ID. See the note below.</td></tr>
@@ -135,9 +136,29 @@ postiee search "harness agent" --json`}
   <div class="note warn">
     <p>
       <strong>This is local only.</strong> <code>forget</code> deletes your
-      record, not the post. Nothing is removed from LinkedIn — no API deletes a
-      member's own post at any tier. To take a post down, delete it in LinkedIn
-      by hand.
+      record, not the post. To take a post down on LinkedIn itself, use
+      <code>unpublish</code>, below. That is the one write that cannot be undone.
+    </p>
+  </div>
+
+  <h2>unpublish</h2>
+
+  <CodeBlock code={'postiee unpublish urn:li:share:12345'} />
+
+  <p>
+    Deletes the post on LinkedIn, then removes it from your local history. Both
+    halves, in that order — if LinkedIn refuses the delete, the local row stays
+    so the post is still findable and you can retry.
+  </p>
+
+  <div class="note warn">
+    <p>
+      <strong>This cannot be undone.</strong> There is no trash, and no API can
+      read a post back afterwards to reconstruct it. Take the URN from
+      <code>history</code> and check it before you run the command.
+    </p>
+    <p>
+      <code>--dry-run</code> reports what it would do and stops there.
     </p>
   </div>
 

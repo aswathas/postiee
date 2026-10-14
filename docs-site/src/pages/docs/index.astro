@@ -181,6 +181,32 @@ postiee auth status`}
     </p>
   </div>
 
+  <h2>6. Take it back down</h2>
+
+  <p>
+    If you want the test post gone, <code>unpublish</code> deletes it on
+    LinkedIn and then removes it from your local history. The URN is in the
+    output of the post you just made.
+  </p>
+
+  <CodeBlock
+    code={`postiee unpublish urn:li:share:12345 --dry-run   # see what it would do
+postiee unpublish urn:li:share:12345`}
+  />
+
+  <div class="note warn">
+    <p>
+      <strong>This one is permanent.</strong> There is no undo, and no API can
+      read a deleted post back to rebuild it. <code>--dry-run</code> prints the
+      plan without touching anything.
+    </p>
+    <p>
+      If you only want it out of your local search results and not off LinkedIn,
+      use <code>forget</code> instead. See
+      <a href="/postiee/docs/commands">Commands</a>.
+    </p>
+  </div>
+
   <h2>Where your files live</h2>
 
   <div class="table-scroll">

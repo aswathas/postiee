@@ -110,6 +110,7 @@ postiee --agent history --limit 5`}
     <li><code>history</code> — every post recorded locally, newest first</li>
     <li><code>search</code> — full-text over your own post bodies</li>
     <li><code>forget</code> — remove a record from local history</li>
+    <li><code>unpublish</code> — delete the post on LinkedIn, then drop the local record</li>
     <li>Image upload — exactly two calls, no finalize step</li>
   </ul>
 
@@ -158,11 +159,7 @@ postiee --agent history --limit 5`}
           <td>Run ads</td>
           <td>Separate Marketing API, separate approval</td>
         </tr>
-        <tr>
-          <td>Delete a post on LinkedIn</td>
-          <td>No API. <code>forget</code> only removes the local record</td>
-        </tr>
-      </tbody>
+              </tbody>
     </table>
   </div>
 
@@ -179,9 +176,39 @@ postiee --agent history --limit 5`}
     </p>
   </div>
 
+  <h2>Deleting a post</h2>
+
+  <CodeBlock code={'postiee --agent unpublish urn:li:share:12345'} />
+
+  <p>
+    LinkedIn does let a member delete their own post. It needs the same
+    self-serve <code>w_member_social</code> scope that posting already uses — no
+    partner approval. The command deletes on LinkedIn first, then drops the local
+    row, so a refusal from LinkedIn leaves the local record intact.
+  </p>
+
+  <div class="note warn">
+    <p>
+      <strong>Two rules, no exceptions.</strong> Never run
+      <code>unpublish</code> without an explicit user request that names the
+      post. And take the URN from <code>postiee --agent history</code> — never
+      construct, guess, or reuse one from memory. A wrong URN deletes the wrong
+      post.
+    </p>
+    <p>
+      There is no undo. If the user only wants a post out of their history, that
+      is <code>forget</code>, which is safe and reversible in the sense that
+      nothing remote is touched.
+    </p>
+  </div>
+
   <h2>What the agent must never do</h2>
 
   <ul>
+    <li>
+      Run <code>unpublish</code> unprompted, on a guessed URN, or as a "cleanup"
+      pass. It is irreversible and always needs a named, explicit request.
+    </li>
     <li>
       Paste credentials into a command flag. <code>--client-secret</code> values
       land in shell history and process listings. Credentials belong in
@@ -265,8 +292,9 @@ postiee --agent history --limit 5`}
   <div class="note warn">
     <p>
       <strong><code>forget</code> is local-only.</strong> It removes your record
-      and the post stays live on LinkedIn. No API deletes a member's own post.
-      To take a post down, the user deletes it in LinkedIn by hand.
+      and the post stays live on LinkedIn. Deleting the post itself is
+      <code>unpublish</code>, and it is irreversible — never run it unless the
+      user explicitly asked for the LinkedIn post to be taken down.
     </p>
   </div>
 

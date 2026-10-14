@@ -113,10 +113,33 @@ Tokens last 60 days. Programmatic refresh is partner-gated, so re-running
 | `postiee history` | Everything you've posted, newest first |
 | `postiee search <query>` | Full-text search your own posts |
 | `postiee forget <urn>` | Drop a post from local history |
+| `postiee unpublish <urn>` | Delete the post on LinkedIn itself, then drop it from local history. Irreversible. |
 | `postiee auth login \| logout \| status` | OAuth lifecycle |
 | `postiee doctor` | Config, credentials, and API reachability |
 
 Add `--agent` to any command for JSON, non-interactive, colour-free output.
+
+---
+
+## Deleting a post
+
+Two commands, and they are not interchangeable.
+
+```sh
+postiee forget urn:li:share:12345    # local history only — the post stays live
+postiee unpublish urn:li:share:12345 # deletes on LinkedIn, then locally
+```
+
+`unpublish` calls `DELETE /rest/posts/{urn}`, which is available at the
+self-serve tier — no partner approval, no extra scope. It deletes on LinkedIn
+first and drops the local row only once LinkedIn confirms, so a refusal leaves
+your history intact and the post still findable.
+
+**There is no undo and no trash.** `DELETE` is destructive, and LinkedIn cannot
+read a post back afterwards to reconstruct it, so check the URN before you run
+it. `--dry-run` reports what it would do and stops there.
+
+Take the URN from `postiee history`.
 
 ---
 
@@ -222,7 +245,8 @@ postiee post "text"
 **1. The post ID is in a header, not the body.** `POST /rest/posts` returns
 `201` with an empty body. Reading `.Body` gets you nothing. postiee reads
 `x-restli-id` and treats its absence as a hard error, because a post whose ID
-was lost cannot be deleted or recorded — and no API can read it back.
+was lost cannot be recorded, cannot be deleted, and cannot be read back by
+anyone.
 
 **2. Person IDs are scoped per app.** The same human has a different ID under a
 different LinkedIn app, and reusing one across apps returns 404. Always resolve

@@ -317,8 +317,8 @@ I'd rather be clear about this now than have you find out in an afternoon.
 
 | | Why |
 |---|---|
-| **Read posts you made in the LinkedIn app** | `r_member_social` is closed. No API can do this. Search only covers posts made through postiee. |
-| **Delete a post on LinkedIn** | No endpoint exists at any tier. `forget` removes your *local record* and leaves the post live. |
+| **Read posts you made in the LinkedIn app** | `r_member_social` is closed and `GET /rest/posts` is partner-gated. Search only covers posts made through postiee. |
+| **Delete a post on LinkedIn** | Supported — `posts delete <urn>`, irreversible. `forget` is local-only and leaves the post live. |
 | **Comments, reactions** | Need Community Management API approval |
 | **Analytics, impressions, followers** | Need separate analytics scopes, also gated |
 | **Scheduled posts** | No `publishAt` field exists in the API. Scheduling would be a local timer pretending to be a feature. |

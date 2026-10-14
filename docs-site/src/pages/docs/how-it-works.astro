@@ -86,6 +86,41 @@ Authorization: Bearer $TOKEN
     looks like "that post doesn't exist" rather than "you escaped it wrong".
   </p>
 
+  <h2>Taking a post down</h2>
+
+  <p>
+    Deletion is the one write that cannot be undone, so it is worth being
+    explicit about what happens:
+  </p>
+
+  <pre><code>postiee unpublish urn:li:share:12345
+  → DELETE /rest/posts/urn%3Ali%3Ashare%3A12345
+  → 204 No Content
+  → local row removed</code></pre>
+
+  <p>
+    The order matters. postiee deletes on LinkedIn first and drops the local
+    record only after LinkedIn confirms, so a refusal leaves your history intact
+    and the post still findable. Doing it the other way round would destroy the
+    only identifier you have for a post that is still live.
+  </p>
+
+  <div class="note warn">
+    <p>
+      <strong>There is no undo.</strong> Once the post is gone, nothing can
+      reconstruct it — not postiee, and not LinkedIn, because
+      <code>r_member_social</code> is closed and no API can read posts back.
+      Check the URN, and use <code>--dry-run</code> first.
+    </p>
+  </div>
+
+  <p>
+    This sits inside the self-serve tier. It needs no partner approval and no
+    scope beyond <code>w_member_social</code>, which is the same one
+    <code>post</code> already uses. Reading a post <em>back</em> is a different
+    story — that is partner-gated.
+  </p>
+
   <h2>Two more things worth knowing</h2>
 
   <h3>Images are two steps, not three</h3>

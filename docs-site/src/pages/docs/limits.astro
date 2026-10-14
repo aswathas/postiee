@@ -40,6 +40,15 @@ import ScopeGate from '../../components/ScopeGate.astro';
     seconds.
   </p>
 
+  <p>
+    <strong>Deleting your own post is not on this list.</strong>
+    <code>unpublish</code> deletes it on LinkedIn, using the same self-serve
+    <code>w_member_social</code> scope that posting already needs. Only
+    <em>reading</em> posts back requires the closed
+    <code>r_member_social</code>. See
+    <a href="/postiee/docs/commands">Commands</a>.
+  </p>
+
   <h2>What postiee can't do</h2>
 
   <figure>
@@ -90,10 +99,6 @@ import ScopeGate from '../../components/ScopeGate.astro';
         <tr>
           <td>Running ads</td>
           <td><span class="badge no">separate product</span> The Marketing API is a different platform with its own approval.</td>
-        </tr>
-        <tr>
-          <td>Deleting a post on LinkedIn</td>
-          <td><span class="badge no">no API exists</span> No endpoint exists at any tier. <code>forget</code> deletes your local record and leaves the post live.</td>
         </tr>
         <tr>
           <td>Scheduled posts</td>
@@ -151,6 +156,8 @@ import ScopeGate from '../../components/ScopeGate.astro';
         <tr><td>Junk input never errors — <code>"</code>, <code>AND</code>, <code>()</code>, <code>NEAR(a b)</code>, <code>--</code></td><td><span class="badge ok">pass</span></td></tr>
         <tr><td>Re-recording a post upserts instead of duplicating</td><td><span class="badge ok">pass</span></td></tr>
         <tr><td>Deleting removes the search index entry too</td><td><span class="badge ok">pass</span></td></tr>
+        <tr><td>Deleting on LinkedIn sends <code>X-RestLi-Method: DELETE</code></td><td><span class="badge ok">pass</span></td></tr>
+        <tr><td>Deleting an already-deleted post is accepted, not an error</td><td><span class="badge ok">pass</span></td></tr>
         <tr><td>Post ID read from the response header, not the body</td><td><span class="badge ok">pass</span></td></tr>
         <tr><td>Image upload performs exactly two calls</td><td><span class="badge ok">pass</span></td></tr>
         <tr><td>URNs in paths are fully percent-encoded</td><td><span class="badge ok">pass</span></td></tr>

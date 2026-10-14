@@ -8,10 +8,11 @@ const lines = [
   { cmd: 'postiee post "shipped a new feature today"', out: 'Posted · urn:li:ugcPost:…', tone: 'ok' },
   { cmd: 'postiee search harness', out: '1 match · “we rebuilt the harness last week”', tone: 'out' },
   { cmd: 'postiee history', out: '42 posts · newest first', tone: 'out' },
+  { cmd: 'postiee unpublish urn:li:share:12345', out: '204 · gone from LinkedIn and from local history', tone: 'warn' },
 ];
 ---
 
-<div class="term" data-term role="img" aria-label="A terminal showing three postiee commands: posting, searching, and listing history.">
+<div class="term" data-term role="img" aria-label="A terminal showing four postiee commands: posting, searching, listing history, and deleting a post.">
   <div class="term__bar">
     <span class="term__dot" style="background:#ff5f57"></span>
     <span class="term__dot" style="background:#febc2e"></span>
@@ -81,6 +82,7 @@ const lines = [
     margin-bottom: .55rem;
   }
   .term__out--ok { color: var(--accent); }
+  .term__out--warn { color: #ff9f0a; }
 
   .term__caret {
     display: inline-block; width: .5rem; height: 1em;
@@ -104,7 +106,8 @@ const lines = [
   /* nth-of-type counts divs, and the body alternates line, out, line, out...
      so positions 6 and 7 are an .term__out and an .term__line respectively.
      Mislabelling either one silently drops its delay and the line pops in at
-     t=0, ahead of the first command. */
+     t=0, ahead of the first command. Keep the list as long as `lines` — adding
+     a command without its pair drops that line's delay. */
   .term__line:nth-of-type(1) { animation-delay: .35s; }
   .term__out:nth-of-type(2)   { animation-delay: .85s; }
   .term__line:nth-of-type(3) { animation-delay: 1.35s; }
@@ -112,6 +115,8 @@ const lines = [
   .term__line:nth-of-type(5) { animation-delay: 2.4s; }
   .term__out:nth-of-type(6)   { animation-delay: 2.95s; }
   .term__line:nth-of-type(7) { animation-delay: 3.5s; }
+  .term__out:nth-of-type(8)   { animation-delay: 4.05s; }
+  .term__line:nth-of-type(9) { animation-delay: 4.6s; }
 
   @keyframes rise {
     from { opacity: 0; transform: translateY(6px); }
