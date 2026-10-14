@@ -16,7 +16,15 @@ const nav = [
   { href: '/about', label: 'About' },
 ];
 
-const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+// Pages are served from a subpath (/postiee), so every internal link needs the
+// base prepended and active-state matching needs it stripped. BASE_URL has no
+// trailing slash, so it must be added before concatenating.
+const rawBase = import.meta.env.BASE_URL;
+const base = `${rawBase.replace(/\/$/, '')}/`;
+const u = (p: string) => `${base}${p.replace(/^\//, '')}`;
+
+const path =
+  Astro.url.pathname.replace(/\/$/, '').replace(new RegExp(`^${rawBase}`), '') || '/';
 const isActive = (href: string) =>
   path === href || (href !== '/' && path.startsWith(href));
 ---
@@ -33,14 +41,14 @@ const isActive = (href: string) =>
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href={u("/favicon.svg")} type="image/svg+xml" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
 
     <header class="site">
       <div class="wrap">
-        <a class="brand" href="/">
+        <a class="brand" href={u("/")}>
           <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none">
             <rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.8" />
             <path d="M6 10v4M9.5 10v4M13 10h4M13 14h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
@@ -53,7 +61,7 @@ const isActive = (href: string) =>
             {nav.map((item) => (
               <li>
                 <a
-                  href={item.href}
+                  href={u(item.href)}
                   aria-current={isActive(item.href) ? 'page' : undefined}
                 >
                   {item.label}
