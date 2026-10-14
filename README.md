@@ -3,6 +3,8 @@
 Post to LinkedIn from your terminal. Search your own post history — because
 LinkedIn won't let any API read it back.
 
+**Docs:** https://aswathas.github.io/postiee/
+
 ```sh
 postiee post "shipped a new feature today"
 postiee search harness
