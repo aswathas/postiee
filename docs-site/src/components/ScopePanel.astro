@@ -2,8 +2,16 @@
 /**
  * The scope panel. This is the pitch: naming what the tool cannot do, up
  * front, is both the honesty the product is built on and the argument for why
- * it exists. Colour is never the only signal — every row carries a word.
+ * it exists. Colour is never the only signal — every row carries a word, and
+ * each tier carries a label that says what the tier means.
  */
+const WAVES = [
+  { tone: 'ok', label: 'Works for you today' },
+  { tone: 'mid', label: 'If LinkedIn grants partner access' },
+  { tone: 'no', label: 'Closed, or no API at any tier' },
+];
+const waveOf: Record<string, number> = { ok: 0, mid: 1, no: 2 };
+
 const rows = [
   { name: 'post', why: 'self-serve', tone: 'ok' },
   { name: 'history', why: 'local', tone: 'ok' },
@@ -15,6 +23,18 @@ const rows = [
   { name: 'invitations', why: 'no API', tone: 'no' },
   { name: 'ads', why: 'separate product', tone: 'no' },
 ];
+
+// One delay per row: a short stagger inside a tier, a longer beat between
+// tiers, so the panel reads as three arguments rather than nine bullets.
+const TIER = 0.5;
+const STAGGER = 0.05;
+const labelDelay = rows.map((_, i) => `${waveOf[rows[i].tone] * TIER}s`);
+const rowDelay: string[] = [];
+let pos = 0;
+rows.forEach((row, i) => {
+  pos = i > 0 && rows[i - 1].tone === row.tone ? pos + 1 : 0;
+  rowDelay[i] = (waveOf[row.tone] * TIER + 0.07 + pos * STAGGER).toFixed(2);
+});
 ---
 
 <div class="scope">
@@ -24,12 +44,84 @@ const rows = [
   </p>
 
   {
-    rows.map((row) => (
-      <div class="scope__row">
-        <span class={`dot dot--${row.tone}`} aria-hidden="true" />
-        <span class="scope__name">{row.name}</span>
-        <span class="scope__why">{row.why}</span>
-      </div>
-    ))
+    rows.map((row, i) => {
+      const wave = waveOf[row.tone];
+      const startsTier = i === 0 || rows[i - 1].tone !== row.tone;
+      const endsTier = rows[i + 1]?.tone !== row.tone;
+      return (
+        <Fragment>
+          {startsTier && (
+            <p class="scope__wave" style={`--d:${labelDelay[i]}`}>
+              {WAVES[wave].label}
+            </p>
+          )}
+          <div
+            class:list={['scope__row', endsTier && 'scope__row--end']}
+            style={`--d:${rowDelay[i]}`}
+          >
+            <span class={`dot dot--${row.tone}`} aria-hidden="true" />
+            <span class="scope__name">{row.name}</span>
+            <span class="scope__why">{row.why}</span>
+          </div>
+        </Fragment>
+      );
+    })
   }
 </div>
+
+<style>
+  /* Tier label. Quiet by design: the dot carries the colour, the label carries
+     the meaning, so colour is never the only signal. */
+  .scope__wave {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1.1rem 0 0.3rem;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fg-3);
+  }
+  .scope__wave::before {
+    content: '';
+    flex: none;
+    width: 14px;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.5;
+  }
+  .scope__head + .scope__wave { margin-top: 0; }
+
+  /* Last row of a tier drops its rule so the tiers read as three blocks. */
+  .scope__row.scope__row--end { border-bottom: 0; }
+
+  /* Entrance: three beats, not nine. Rows and labels are in the DOM at full
+     opacity unless this animation runs; the reduced-motion path below turns it
+     off entirely and leaves everything settled and visible. */
+  .scope__wave,
+  .scope__row {
+    opacity: 0;
+    animation: tier-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: var(--d, 0s);
+  }
+
+  @keyframes tier-in {
+    from {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scope__wave,
+    .scope__row {
+      opacity: 1;
+      animation: none;
+    }
+  }
+</style>

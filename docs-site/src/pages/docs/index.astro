@@ -34,7 +34,8 @@ import CodeBlock from '../../components/CodeBlock.astro';
 
   <h3>From source</h3>
 
-  <p>Needs Go 1.26.9 or newer.</p>
+  <p>Needs Go 1.26.9 or newer. The <code>sudo mv</code> is the only step that
+  needs admin rights; build it anywhere you like.</p>
 
   <CodeBlock
     code={`git clone https://github.com/aswathas/postiee.git
@@ -54,7 +55,8 @@ sudo mv postiee /usr/local/bin/`}
 
   <p>
     There is no shared client ID. Every person needs their own app, because
-    LinkedIn scopes are granted per application.
+    LinkedIn grants scopes per application. Both products below are required:
+    one lets you post, the other lets postiee work out who you are.
   </p>
 
   <ol>
@@ -65,27 +67,35 @@ sudo mv postiee /usr/local/bin/`}
     </li>
     <li>
       <strong>Products</strong> tab → add <strong>Share on LinkedIn</strong>.
-      This grants <code>w_member_social</code>. Self-serve, no review.
+      This grants <code>w_member_social</code>, which is what writes the post.
+      Self-serve, no review.
     </li>
     <li>
       <strong>Products</strong> tab → add <strong>Sign In with LinkedIn</strong>.
-      This grants <code>openid</code> and <code>profile</code>, which is what
-      lets postiee resolve your own member ID at runtime.
+      This grants <code>openid</code> and <code>profile</code>. Without it
+      postiee cannot resolve your own member ID, and every post fails.
     </li>
     <li>
       <strong>Auth</strong> tab → add this exact redirect URL:
     </li>
   </ol>
 
-  <pre><code>http://localhost:8085/callback</code></pre>
+  <pre><code>http://127.0.0.1:8085/callback</code></pre>
 
   <div class="note warn">
     <p>
-      <strong>LinkedIn matches redirect URLs as exact strings.</strong> If you
-      registered <code>localhost</code> and postiee sends <code>127.0.0.1</code>,
-      login fails with <em>"redirect_uri does not match the registered value"</em>.
-      Register the value above exactly, or set
-      <code>POSTIEE_REDIRECT_URI</code> to match whatever you registered.
+      <strong>Copy that exactly, including <code>127.0.0.1</code>.</strong>
+      LinkedIn compares redirect URLs as exact strings, and
+      <code>localhost</code> is not the same value to it as
+      <code>127.0.0.1</code>. Registering <code>localhost</code> is the single
+      most common reason login fails with
+      <em>"redirect_uri does not match the registered value"</em>.
+    </p>
+    <p>
+      If you already registered a different value, set
+      <code>POSTIEE_REDIRECT_URI</code> to match it instead.
+      <code>auth login</code> prints the exact URI it is sending before it opens
+      your browser, so you can compare the two directly.
     </p>
   </div>
 
@@ -131,9 +141,10 @@ chmod 600 ~/.config/postiee/credentials.toml`}
   <CodeBlock code="postiee auth login --port 8085" />
 
   <p>
-    Your browser opens, you approve, and the token is stored. The window stays
-    open for 15 minutes, which is enough for a password, a 2FA prompt, and an
-    email code.
+    Your browser opens, you approve, and the token is stored. postiee prints the
+    exact redirect URI it is sending before it opens the browser — compare it
+    against your Auth tab if login fails. The window stays open 15 minutes,
+    which is enough for a password, a 2FA prompt, and an email code.
   </p>
 
   <div class="note">
@@ -148,15 +159,27 @@ chmod 600 ~/.config/postiee/credentials.toml`}
 
   <CodeBlock
     code={`postiee doctor
-postiee auth status
-postiee userinfo`}
+postiee auth status`}
   />
 
   <p>
-    <code>doctor</code> checks your config, your credentials, and that
-    <code>api.linkedin.com</code> is reachable. <code>userinfo</code> calls
-    LinkedIn and prints your name — if that works, your token is real.
+    <code>doctor</code> reports where it found your config and credentials,
+    whether a token is loaded, and whether <code>api.linkedin.com</code> is
+    reachable. <code>auth status</code> confirms the token in one line.
   </p>
+
+  <p>Then make the post that proves it:</p>
+
+  <CodeBlock code='postiee post "first post via postiee" -v CONNECTIONS' />
+
+  <div class="note info">
+    <p>
+      It prints a permalink and the post is on your feed. Nothing on LinkedIn
+      can show you that record later — from here on,
+      <code>postiee history</code> is how you find it. That is the whole reason
+      this tool exists.
+    </p>
+  </div>
 
   <h2>Where your files live</h2>
 
@@ -171,17 +194,17 @@ postiee userinfo`}
       </thead>
       <tbody>
         <tr>
-          <td>Credentials</td>
-          <td><code>~/.config/postiee/</code></td>
-          <td><code>%USERPROFILE%\.config\postiee\</code></td>
+          <td>App credentials — you write these</td>
+          <td><code>~/.config/postiee/credentials.toml</code></td>
+          <td><code>%USERPROFILE%\.config\postiee\credentials.toml</code></td>
         </tr>
         <tr>
-          <td>Token</td>
+          <td>Access token — postiee writes this after login</td>
           <td><code>~/.local/share/postiee/</code></td>
-          <td><code>%LOCALAPPDATA%\postiee\</code></td>
+          <td><code>%USERPROFILE%\.local\share\postiee\</code></td>
         </tr>
         <tr>
-          <td>History</td>
+          <td>History database</td>
           <td><code>~/.config/postiee/history.db</code></td>
           <td><code>%USERPROFILE%\.config\postiee\history.db</code></td>
         </tr>
@@ -190,9 +213,25 @@ postiee userinfo`}
   </div>
 
   <p>
-    Note that the token file and the credentials file have the same name but
-    live in different directories. Your app credentials are the one you wrote
-    by hand; the token store is written for you after login.
+    <code>postiee doctor</code> prints the resolved path of each one, so you
+    never have to guess.
+  </p>
+
+  <div class="note warn">
+    <p>
+      <strong>Back up <code>history.db</code>.</strong> It is the only surviving
+      record of your posts — see <a href="/postiee/about">why</a>. Copying one
+      file is the whole backup.
+    </p>
+  </div>
+
+  <h2>If something goes wrong</h2>
+
+  <p>
+    Run <code>postiee doctor</code> first; it names what it found and what it
+    couldn't. Then the
+    <a href="/postiee/docs/commands#troubleshooting">troubleshooting table</a>
+    maps LinkedIn's error text to a fix.
   </p>
 
   <h2>Next</h2>

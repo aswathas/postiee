@@ -11,7 +11,7 @@ const lines = [
 ];
 ---
 
-<div class="term" role="img" aria-label="A terminal showing three postiee commands: posting, searching, and listing history.">
+<div class="term" data-term role="img" aria-label="A terminal showing three postiee commands: posting, searching, and listing history.">
   <div class="term__bar">
     <span class="term__dot" style="background:#ff5f57"></span>
     <span class="term__dot" style="background:#febc2e"></span>
@@ -42,9 +42,6 @@ const lines = [
   .term {
     margin: 0;
     height: 100%;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
     text-align: left;
     background: #0d0d10;
     border: 1px solid var(--hairline-2);
@@ -70,6 +67,9 @@ const lines = [
   .term__body {
     padding: 1.1rem 1.25rem 1.35rem;
     font-family: var(--mono); font-size: .82rem; line-height: 1.75;
+    /* Longest command needs ~346px of monospace at .82rem. Below 480px the
+       panel can't give it, so the line hard-wraps mid-phrase. Step the type
+       down here instead of letting the text break. */
   }
 
   .term__prompt { color: var(--accent); user-select: none; }
@@ -89,22 +89,40 @@ const lines = [
   }
   @keyframes blink { to { visibility: hidden; } }
 
+  /* The one authored moment: the caret blinks while there is work to do, then
+     goes solid the instant the last command lands. The post ID is on disk and
+     there is nothing left to type, so nothing blinks — and the page stops
+     moving. Without JS this never fires and the caret blinks as before. */
+  .term[data-quiet] .term__caret { animation: none; }
+
   /* Entrance: each pair fades up in sequence. Set up in markup-free CSS so a
      script failure still leaves readable, settled text. */
   .term__line, .term__out {
     opacity: 0;
     animation: rise .5s cubic-bezier(.2, .7, .3, 1) forwards;
   }
+  /* nth-of-type counts divs, and the body alternates line, out, line, out...
+     so positions 6 and 7 are an .term__out and an .term__line respectively.
+     Mislabelling either one silently drops its delay and the line pops in at
+     t=0, ahead of the first command. */
   .term__line:nth-of-type(1) { animation-delay: .35s; }
   .term__out:nth-of-type(2)   { animation-delay: .85s; }
   .term__line:nth-of-type(3) { animation-delay: 1.35s; }
   .term__out:nth-of-type(4)   { animation-delay: 1.9s; }
   .term__line:nth-of-type(5) { animation-delay: 2.4s; }
-  .term__line:nth-of-type(6) { animation-delay: 3.1s; }
+  .term__out:nth-of-type(6)   { animation-delay: 2.95s; }
+  .term__line:nth-of-type(7) { animation-delay: 3.5s; }
 
   @keyframes rise {
     from { opacity: 0; transform: translateY(6px); }
     to   { opacity: 1; transform: none; }
+  }
+
+  @media (max-width: 30rem) {
+    .term__body { font-size: .72rem; }
+  }
+  @media (max-width: 23rem) {
+    .term__body { font-size: .66rem; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -117,17 +135,26 @@ const lines = [
   // Type the command text into each line. With reduced motion the <span> stays
   // empty, so fill it immediately instead of leaving the line blank.
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const term = document.querySelector<HTMLElement>('[data-term]');
   const spans = document.querySelectorAll<HTMLElement>('.term__cmd');
+  const quiet = () => term?.setAttribute('data-quiet', '');
 
   if (reduced || !spans.length) {
     spans.forEach((s) => (s.textContent = s.dataset.cmd ?? ''));
+    quiet();
   } else {
+    const last = spans.length - 1;
     const type = (el: HTMLElement, i: number) => {
       const text = el.dataset.cmd ?? '';
       let n = 0;
       const tick = () => {
-        if (n > text.length) return;
-        el.textContent = text.slice(0, n++);
+        el.textContent = text.slice(0, n);
+        if (n >= text.length) {
+          // Let the final glyph land before the caret stops.
+          if (i === last) setTimeout(quiet, 150);
+          return;
+        }
+        n += 1;
         setTimeout(tick, 22 + Math.random() * 30);
       };
       setTimeout(tick, i * 1000 + 400);

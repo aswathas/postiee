@@ -16,13 +16,13 @@ import Base from '../layouts/Docs.astro';
   <h2>The problem</h2>
 
   <p>
-    You post something. You cannot find it again. LinkedIn's own search has no
+    You post something. Later you cannot find it. LinkedIn's own search has no
     "your posts" filter, and once a post is deleted it is unfindable there too.
   </p>
 
   <p>
-    So you go looking for a tool that keeps your post history. You find a few
-    things instead:
+    So you go looking for a tool that keeps your post history. What you find
+    instead:
   </p>
 
   <ul>
@@ -47,10 +47,11 @@ import Base from '../layouts/Docs.astro';
 
   <p>
     One project came close: an MIT-licensed MCP server using the official API
-    with a local SQLite log of created posts. But it stores the post text without
-    any way to query it, and its <code>list_my_posts</code> reads only that local
-    database — never LinkedIn — so anything you posted before installing it is
-    invisible.
+    with a local SQLite log of created posts. As I read its source, it stored the
+    post text with no way to query it, and its <code>list_my_posts</code> read
+    only that local database — never LinkedIn — so anything posted before
+    installing it was invisible. Worth checking its current source before taking
+    this as current; it may have changed.
   </p>
 
   <h2>The specific thing that makes it impossible</h2>
@@ -64,9 +65,9 @@ import Base from '../layouts/Docs.astro';
 
   <p>
     That is the whole problem in one line. You can write to LinkedIn through an
-    approved app, but no approved app can read back what it wrote. And LinkedIn's
-    own native scheduler, which does let you browse your history, is a
-    web product with no API.
+    approved app, but no approved app can read back what it wrote. LinkedIn's own
+    native scheduler does let you browse your history — as a web product with no
+    API behind it.
   </p>
 
   <p class="note">
@@ -89,8 +90,9 @@ import Base from '../layouts/Docs.astro';
     </li>
     <li>
       <strong>Nothing ships that cannot work.</strong> No comment command that
-      403s, no analytics stub. The absence list is longer than the feature list,
-      and each omission says why.
+      403s, no analytics stub. The omission list is longer than the feature
+      list, and every omission says why — see
+      <a href="/postiee/docs/limits">Limits and scope</a>.
     </li>
     <li>
       <strong>No scraping, ever.</strong> Official API only. Your credentials go
@@ -113,7 +115,7 @@ import Base from '../layouts/Docs.astro';
     <a href="https://github.com/mvanhorn/cli-printing-press">CLI Printing
     Press</a>, which generates Go CLIs with a local store and offline search. The
     LinkedIn client, the history layer, credential handling, and every correction
-    to the generated code were hand-written.
+    to the generated code were written by hand.
   </p>
 
   <p>
@@ -136,8 +138,8 @@ import Base from '../layouts/Docs.astro';
   <h2>License</h2>
 
   <p>
-    Apache-2.0. Use it, fork it, extend it. If you add a scope LinkedIn has
-    opened since this was written, the architecture will take it — the local
+    Apache-2.0. Use it, fork it, extend it. If LinkedIn opens a scope that was
+    closed when this was written, the architecture will take it — the local
     history already stores what a comments table would need.
   </p>
 </Base>

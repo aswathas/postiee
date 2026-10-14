@@ -2,22 +2,29 @@
 
 /* ===========================================================================
    Tokens. Near-black canvas with Apple's off-white (#f5f5f7) and its signature
-   grey ramp. Contrast on --bg: fg 17.8:1, fg-2 7.4:1, fg-3 4.6:1.
+   grey ramp.
+
+   Every ratio below is computed, not eyeballed (WCAG 2.x relative luminance).
+   --fg-3 was lightened from #7a7a80 because it failed AA on the elevated
+   surfaces; these are the only figures for the current values:
+
+     --fg   on --bg 19.29:1   on --surface 17.17:1
+     --fg-2 on --bg  8.16:1   on --surface  7.27:1
+     --fg-3 on --bg  5.80:1   on --surface 5.17:1   on --surface-2 4.79:1
+
+   All three clear AA on every surface they are used on.
    =========================================================================== */
 :root {
   --bg: #000000;
   --bg-alt: #0a0a0c;
   --surface: #121215;
-  --surface-2: #1a1a1f;
 
-  --fg: #f5f5f7;      /* 19.3:1 on --bg */
-  --fg-2: #a1a1a6;    /* 8.2:1 on --bg */
-  --fg-3: #7a7a80;    /* 4.9:1 on --bg, 4.7:1 on --surface — computed, not estimated */
+  --fg: #f5f5f7;
+  --fg-2: #a1a1a6;
+  --fg-3: #86868c;
 
   --accent: #30d158;
-  --accent-dim: #28b947;
   --accent-ink: #04150a;
-  --blue: #2997ff;
 
   --hairline: rgba(255, 255, 255, 0.11);
   --hairline-2: rgba(255, 255, 255, 0.06);
@@ -30,10 +37,9 @@
 
   --nav-h: 3rem;
   --gutter: clamp(1.25rem, 5vw, 3rem);
-  --measure: 40rem;   /* ~78ch: the detector measured 89-101 chars at 46rem */
+  --measure: 38rem;   /* ~74ch. 40rem measured ~78ch, which overruns the 45-75 band */
   --r-sm: 4px;
   --r-md: 6px;
-  --r-lg: 8px;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -49,22 +55,28 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--sans);
-  font-size: 1rem;
-  line-height: 1.6;
+  font-size: 1rem;   /* the 16px floor; nothing below this, on any viewport */
+  /* Light-on-dark reads smaller than light-on-light, so the body role gets a
+     touch more leading and a touch more tracking than a printed page would. */
+  line-height: 1.65;
+  letter-spacing: .005em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Fades in once the font has loaded; prevents a flash of fallback text. */
-  opacity: 0;
-  animation: fade .5s ease forwards;
 }
-@keyframes fade { to { opacity: 1; } }
+
+/* Only 400/500/600 load, so the UA default of 700 would be synthesised. */
+strong, b { font-weight: 600; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  body { animation: none; opacity: 1; }
   *, *::before, *::after {
     animation-duration: .01ms !important;
+    /* Duration alone is not enough: elements animated with fill-mode `backwards`
+       still render their 0% keyframe (opacity: 0) for the whole delay, which
+       left the hero headline invisible for ~550ms. Zero the delay too. */
+    animation-delay: 0s !important;
     transition-duration: .01ms !important;
+    transition-delay: 0s !important;
   }
   .reveal { opacity: 1 !important; transform: none !important; }
 }
@@ -92,14 +104,16 @@ a:hover { text-decoration: underline; }
 .skip-link:focus { left: 0; }
 
 /* ===========================================================================
-   Nav — translucent, hairline, sticky. Full-width, not page-constrained.
+   Nav — solid, hairline, sticky. Full-width, not page-constrained.
+
+   Deliberately opaque. A backdrop-filter on a sticky full-width bar is
+   re-rasterised on every scroll frame, and there is nothing behind this bar
+   worth blurring — the grid is masked out and the canvas is #000.
    =========================================================================== */
 .nav {
   position: sticky; top: 0; z-index: 100;
   height: var(--nav-h);
-  background: rgba(0, 0, 0, 0.72);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  background: var(--bg-alt);
   border-bottom: 1px solid var(--hairline-2);
 }
 .nav__in {
@@ -108,15 +122,18 @@ a:hover { text-decoration: underline; }
   display: flex; align-items: center; gap: 1.5rem;
 }
 .brand {
-  display: inline-flex; align-items: center; gap: .5rem;
-  font-size: .95rem; font-weight: 600; letter-spacing: -.01em; color: var(--fg);
+  display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem;
+  font-size: 1rem; font-weight: 600; letter-spacing: -.01em; color: var(--fg);
 }
 .brand:hover { text-decoration: none; color: var(--fg); }
 .brand svg { color: var(--accent); }
 
 .nav__links { display: flex; gap: .25rem; margin-left: auto; align-items: center; }
+/* inline-flex + min-height rather than padding alone: the row is 34px of text and
+   padding at .4rem only reaches ~34px total, under the 44px touch floor. */
 .nav__link {
-  padding: .4rem .7rem; border-radius: var(--r-sm);
+  display: inline-flex; align-items: center; min-height: 2.75rem;
+  padding: 0 .7rem; border-radius: var(--r-sm);
   font-size: .82rem; font-weight: 400; color: var(--fg-2);
   transition: color .2s ease, background .2s ease;
 }
@@ -125,7 +142,7 @@ a:hover { text-decoration: underline; }
 
 .nav__toggle {
   display: none; margin-left: auto;
-  width: 2.25rem; height: 2.25rem;
+  width: 2.75rem; height: 2.75rem;   /* 44px touch floor; fits the 3rem nav bar */
   align-items: center; justify-content: center;
   background: none; border: 1px solid var(--hairline); border-radius: var(--r-sm);
   color: var(--fg); cursor: pointer;
@@ -145,19 +162,28 @@ a:hover { text-decoration: underline; }
 .hero__eyebrow::before { content: '// '; color: var(--accent); }
 .hero h1 {
   font-family: var(--mono);
-  font-size: clamp(2.25rem, 1rem + 5.6vw, 5rem);
+  /* JetBrains Mono advances 0.6em per glyph, so the longest line ("Find it again
+     later.", 20 chars) needs 12em of room — 11.1em after the negative tracking.
+     The .5rem base is solved so that fits at every width down to 320px with a
+     15px scrollbar taken out of the box; a higher base pushes the second line
+     over at 375px, where it orphans "later." onto a third row. Below any width
+     the line cannot fit, text-wrap: balance evens the rows instead. */
+  font-size: clamp(1.75rem, .5rem + 4.6vw, 5rem);
   line-height: 1.06;
   letter-spacing: -.045em;
   font-weight: 600;
   margin: 0 auto 1.5rem;
-  max-width: 16ch;
-  /* Optical centering: the trailing letter-space skews text left. */
-  text-indent: -.035em;
+  max-width: 20ch;   /* was 16ch, which wrapped the second line everywhere */
+  /* Optical centering: the trailing letter-space skews text left by half. */
+  text-indent: -.0225em;
+  text-wrap: balance;
 }
-.hero h1 em { font-style: normal; color: var(--fg-2); }
+/* The second line is the thesis, so it gets the accent's region rather than
+   being pushed back to secondary grey. 10.39:1 on --bg. */
+.hero h1 em { font-style: normal; color: var(--accent); }
 .hero__sub {
   font-size: clamp(1.125rem, .95rem + .9vw, 1.5rem);
-  line-height: 1.45;
+  line-height: 1.5;
   letter-spacing: -.01em;
   color: var(--fg-2);
   max-width: 34ch;
@@ -170,7 +196,7 @@ a:hover { text-decoration: underline; }
   display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
   min-height: 2.75rem; padding: 0 1.4rem;
   border-radius: var(--r-sm); border: 1px solid transparent;
-  font-size: .95rem; font-weight: 500; letter-spacing: -.01em;
+  font-size: 1rem; font-weight: 500; letter-spacing: -.01em;
   cursor: pointer;
   transition: background .2s ease, color .2s ease, border-color .2s ease, transform .12s ease;
 }
@@ -188,10 +214,12 @@ a:hover { text-decoration: underline; }
 .section { padding: clamp(4.5rem, 10vh, 8rem) var(--gutter); }
 .section--alt { background: var(--bg-alt); }
 .section__head { text-align: center; max-width: 40rem; margin: 0 auto clamp(2.5rem, 6vh, 4rem); }
-.section__head h2 {
+/* One band heading, one scale. .cta-band reuses it verbatim. */
+.section__head h2,
+.cta-band h2 {
   font-family: var(--mono);
   font-size: clamp(1.6rem, 1.1rem + 2.2vw, 2.5rem);
-  line-height: 1.14; letter-spacing: -.035em; font-weight: 500;
+  line-height: 1.14; letter-spacing: -.035em; font-weight: 600;
   margin: 0 0 1rem;
 }
 .section__head p {
@@ -211,15 +239,15 @@ a:hover { text-decoration: underline; }
   transition: border-color .25s ease, transform .25s ease;
 }
 .card:hover { border-color: var(--hairline); transform: translateY(-2px); }
-.card h3 { font-family: var(--mono); font-size: .95rem; font-weight: 500; margin: 0 0 .5rem; letter-spacing: -.02em; }
-.card p { font-size: .925rem; color: var(--fg-2); margin: 0; }
+.card h3 {
+  font-family: var(--mono); font-size: 1rem; font-weight: 500;
+  color: var(--fg); margin: 0 0 .5rem;
+  /* Positive tracking: mono set small needs to open up, not tighten. */
+  letter-spacing: .01em;
+}
+.card p { color: var(--fg-2); margin: 0; }
 
 .cta-band { text-align: center; padding: clamp(4.5rem, 10vh, 7.5rem) var(--gutter); }
-.cta-band h2 {
-  font-family: var(--mono);
-  font-size: clamp(1.6rem, 1.1rem + 2.2vw, 2.5rem);
-  letter-spacing: -.035em; font-weight: 500; margin: 0 0 1rem;
-}
 .cta-band p { color: var(--fg-2); font-size: 1.15rem; margin: 0 0 2rem; }
 
 /* ===========================================================================
@@ -242,8 +270,9 @@ a:hover { text-decoration: underline; }
   margin: 0 0 .6rem .75rem;
 }
 .sidebar__link {
-  display: block; padding: .45rem .75rem; border-radius: var(--r-sm);
-  font-size: .9rem; color: var(--fg-2);
+  display: block; padding: 0 .75rem; min-height: 2.75rem;   /* 44px touch floor */
+  border-radius: var(--r-sm);
+  font-size: .9rem; line-height: 2.75rem; color: var(--fg-2);
   transition: color .15s ease, background .15s ease;
 }
 .sidebar__link:hover { color: var(--fg); background: rgba(255, 255, 255, .06); text-decoration: none; }
@@ -261,13 +290,22 @@ a:hover { text-decoration: underline; }
    =========================================================================== */
 h1, h2, h3, h4 { letter-spacing: -.02em; line-height: 1.2; }
 .prose h1, .prose h2, .prose h3 { color: var(--fg); }
-.prose h1 { font-family: var(--mono); font-size: clamp(1.7rem, 1.2rem + 2vw, 2.5rem);
-  margin: 0 0 1rem; font-weight: 500; }
-.prose h2 {
-  font-family: var(--mono); font-size: 1.35rem; margin: 3.25rem 0 1rem;
-  padding-top: 2rem; border-top: 1px solid var(--hairline-2); font-weight: 500;
+/* The prose scale, widest gap at the top: 2.5 / 1.5 / 1.2 / 1.0 (body).
+   Mono takes a little more leading than the sans body it sits over. */
+.prose h1 {
+  font-family: var(--mono); font-size: clamp(1.7rem, 1.2rem + 2vw, 2.5rem);
+  line-height: 1.2; letter-spacing: -.025em; font-weight: 600; margin: 0 0 1rem;
 }
-.prose h3 { font-family: var(--mono); font-size: 1.02rem; margin: 2.25rem 0 .6rem; font-weight: 500; }
+.prose h2 {
+  font-family: var(--mono); font-size: 1.5rem; line-height: 1.25;
+  letter-spacing: -.015em; font-weight: 600;
+  margin: 3.5rem 0 1rem; padding-top: 2rem;
+  border-top: 1px solid var(--hairline-2);
+}
+.prose h3 {
+  font-family: var(--mono); font-size: 1.2rem; line-height: 1.35;
+  letter-spacing: .005em; font-weight: 500; margin: 2.5rem 0 .6rem;
+}
 .prose p, .prose ul, .prose ol { margin: 0 0 1.15rem; }
 .prose li { margin-bottom: .45rem; }
 .prose li::marker { color: var(--fg-3); }
@@ -282,7 +320,7 @@ h1, h2, h3, h4 { letter-spacing: -.02em; line-height: 1.2; }
 .lead { font-size: 1.2rem; line-height: 1.5; color: var(--fg-2); letter-spacing: -.01em; }
 
 code {
-  font-family: var(--mono); font-size: .85em;
+  font-family: var(--mono); font-size: .85em; letter-spacing: .01em;
   background: rgba(255, 255, 255, .08); padding: .12em .4em;
   border-radius: 5px; overflow-wrap: anywhere;
 }
@@ -302,7 +340,7 @@ pre code {
 
 .copy {
   position: absolute; top: .7rem; right: .7rem;
-  min-width: 2.5rem; min-height: 2.25rem; padding: 0 .7rem;
+  min-width: 2.75rem; min-height: 2.75rem; padding: 0 .7rem;   /* 44px touch floor */
   display: inline-flex; align-items: center; gap: .35rem;
   background: rgba(255, 255, 255, .06); color: var(--fg-2);
   border: 1px solid var(--hairline); border-radius: var(--r-sm);
@@ -332,15 +370,28 @@ tbody tr:last-child td { border-bottom: 0; }
 .note {
   border: 1px solid var(--hairline-2);
   background: var(--surface); border-radius: var(--r-sm);
-  padding: 1rem 1.25rem; margin: 0 0 1.5rem; font-size: .95rem;
+  padding: 1rem 1.25rem; margin: 0 0 1.5rem;
 }
 .note p:last-child { margin-bottom: 0; }
 .note.warn { border-color: color-mix(in srgb, var(--warn) 35%, transparent); }
 .note.info { border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+/* Severity is never carried by the border tint alone. Each variant states its
+   own severity in a word, so the note still reads correctly in greyscale or
+   with any form of colour vision. Unlabelled .note stays neutral. */
+.note.warn > p:first-child::before,
+.note.info > p:first-child::before {
+  display: block;
+  font-family: var(--mono); font-size: .74rem; font-weight: 500;
+  letter-spacing: .06em; text-transform: uppercase;
+  margin-bottom: .55rem;
+}
+.note.warn > p:first-child::before { content: 'Careful'; color: var(--warn); }     /* 13.24:1 on --surface */
+.note.info > p:first-child::before { content: 'Good to know'; color: var(--accent); } /* 9.25:1 on --surface */
 
 .badge {
   display: inline-block; padding: .1rem .5rem; border-radius: 3px;
   font-family: var(--mono); font-size: .78rem; font-weight: 500;
+  letter-spacing: .03em;
   border: 1px solid currentColor; white-space: nowrap;
 }
 .badge.ok { color: var(--accent); }
@@ -373,8 +424,7 @@ figcaption { margin-top: 1rem; font-size: .875rem; color: var(--fg-3); text-alig
     display: flex; flex-direction: column; align-items: stretch; gap: .1rem;
     position: absolute; top: var(--nav-h); left: 0; right: 0;
     padding: .75rem var(--gutter) 1rem;
-    background: rgba(0, 0, 0, .94);
-    backdrop-filter: blur(20px);
+    background: var(--bg-alt);
     border-bottom: 1px solid var(--hairline-2);
   }
   .docs { flex-direction: column; }
@@ -384,11 +434,14 @@ figcaption { margin-top: 1rem; font-size: .875rem; color: var(--fg-3); text-alig
     padding: 1.25rem var(--gutter);
   }
   .sidebar[hidden] { display: none; }
-  .prose { max-width: none; padding: 2.5rem var(--gutter) 4rem; }
+  /* width:100% is load-bearing, not tidiness. .docs sets align-items:flex-start,
+     which in a column flex box is a cross-axis (width) alignment: the prose is
+     then fit-content sized, and its min-content — set by the 720-unit scope-gate
+     SVG — overshoots a 320px viewport and scrolls the whole page sideways. */
+  .prose { width: 100%; max-width: none; padding: 2.5rem var(--gutter) 4rem; }
 }
 
 @media (max-width: 30rem) {
-  body { font-size: 1rem; }  /* 16px floor stops iOS zoom-on-focus */
   .hero { padding-top: 3.5rem; }
   .card { padding: 1.5rem 1.25rem; }
 }
@@ -427,11 +480,14 @@ figcaption { margin-top: 1rem; font-size: .875rem; color: var(--fg-3); text-alig
 /* ===========================================================================
    Graph paper. Fixed behind everything, ~3% so it never competes with text.
    Masked to fade out below the fold so long doc pages stay calm.
+   Promoted to its own layer so the mask resolves once instead of on every
+   scroll frame.
    =========================================================================== */
 body::before {
   content: '';
   position: fixed; inset: 0; z-index: -1;
   pointer-events: none;
+  transform: translateZ(0);
   background-image:
     linear-gradient(to right, rgba(255, 255, 255, .032) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, .032) 1px, transparent 1px);
@@ -446,7 +502,11 @@ body::before {
    =========================================================================== */
 .stage {
   display: grid; gap: 1px;
-  grid-template-columns: 1.35fr 1fr;
+  /* Stacked, not side by side. The scope table is ~545px of content and the
+     terminal ~260px, so a two-column stage forced the terminal to stretch and
+     stranded ~285px of empty frame below its last line. Stacked, each panel is
+     its own height and the scope table also gets the width it needs. */
+  grid-template-columns: 1fr;
   max-width: 68rem; margin: clamp(2.5rem, 6vh, 4rem) auto 0;
   background: var(--hairline-2);
   border: 1px solid var(--hairline-2);
@@ -460,6 +520,12 @@ body::before {
   text-align: left;
   font-size: .8rem;
 }
+/* Full-bleed panel, but the capability/status pairs must stay adjacent. Pad the
+   panel rather than the rows so this cannot collide with the component's own
+   scoped margin on .scope__wave. */
+@media (min-width: 64rem) {
+  .scope { padding-inline: clamp(4rem, 14%, 9rem); }
+}
 .scope__head {
   display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
   font-family: var(--mono); font-size: .78rem; letter-spacing: .06em;
@@ -472,23 +538,25 @@ body::before {
   padding: .5rem 0;
   border-bottom: 1px solid var(--hairline-2);
 }
+/* The one place colour carries a claim at region scale: the closed rows. The
+   surrounding copy says most of the table is red, so the red is shown, not
+   just described. The .scope__why word still states it without colour, and
+   every foreground below clears AA on the tinted row (--fg-2 7.78:1). */
+.scope__row:has(.dot--no) { background: color-mix(in srgb, var(--danger) 6%, transparent); }
 .scope__row:last-child { border-bottom: 0; }
-.scope__name { font-family: var(--mono); color: var(--fg); }
+.scope__name { font-family: var(--mono); color: var(--fg); font-weight: 500; }
 .scope__why { margin-left: auto; color: var(--fg-3); font-size: .8rem; text-align: right; }
 
-.dot { width: 6px; height: 6px; border-radius: 50%; flex: none; }
+.dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
 .dot--ok { background: var(--accent); }
 .dot--mid { background: var(--warn); }
 .dot--no { background: var(--danger); }
-
-@media (max-width: 63.99rem) {
-  .stage { grid-template-columns: 1fr; }
-}
 
 /* Benchmarks drop to a quiet strip under the install command (Q6). */
 .strip {
   display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem 2.5rem;
   margin: 2rem auto 0; max-width: 44rem;
-  font-family: var(--mono); font-size: .78rem; color: var(--fg-3);
+  font-family: var(--mono); font-size: .78rem; letter-spacing: .04em;
+  color: var(--fg-3);
 }
 .strip b { color: var(--fg-2); font-weight: 500; }

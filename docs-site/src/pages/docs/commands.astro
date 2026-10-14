@@ -11,8 +11,8 @@ import CodeBlock from '../../components/CodeBlock.astro';
   <h1>Commands</h1>
 
   <p class="lead">
-    Six commands do the real work. Everything else is generated scaffolding you
-    will never need.
+    Six commands do the real work. Everything else exists because the generator
+    emitted it, and you will never need it.
   </p>
 
   <div class="table-scroll">
@@ -28,11 +28,21 @@ import CodeBlock from '../../components/CodeBlock.astro';
         <tr><td><code>history</code></td><td>Every post recorded locally, newest first.</td></tr>
         <tr><td><code>search</code></td><td>Full-text search over your own post bodies.</td></tr>
         <tr><td><code>forget</code></td><td>Remove a post from your local history.</td></tr>
-        <tr><td><code>images</code></td><td>Upload an image and return the URN to attach.</td></tr>
         <tr><td><code>auth</code></td><td>Login, logout, status.</td></tr>
         <tr><td><code>doctor</code></td><td>Config, credential, and connectivity check.</td></tr>
+        <tr><td><code>userinfo</code></td><td>Print your app-scoped member ID. See the note below.</td></tr>
       </tbody>
     </table>
+  </div>
+
+  <div class="note">
+    <p>
+      <strong>You do not need <code>images</code>.</strong> It exists, but
+      <code>post --image</code> already uploads and attaches in one step, and
+      <code>images</code> on its own wants raw headers spelled out. Same for
+      <code>userinfo</code>: it works, but it prints an identifier you never
+      type yourself.
+    </p>
   </div>
 
   <h2>post</h2>
@@ -51,9 +61,9 @@ postiee post "connections only" -v CONNECTIONS`}
       </thead>
       <tbody>
         <tr><td><code>--file</code></td><td>Read the body from a file. Avoids shell quoting entirely.</td></tr>
-        <tr><td><code>--image</code></td><td>Attach one image.</td></tr>
+        <tr><td><code>--image</code></td><td>Attach one image. JPG, PNG, or GIF. One, not many — see the note below.</td></tr>
         <tr><td><code>--alt</code></td><td>Alt text for that image.</td></tr>
-        <tr><td><code>-v</code></td><td><code>PUBLIC</code>, <code>CONNECTIONS</code>, or <code>LOGGED_IN</code>. Defaults to <code>PUBLIC</code>.</td></tr>
+        <tr><td><code>-v</code>, <code>--visibility</code></td><td><code>PUBLIC</code>, <code>CONNECTIONS</code>, or <code>LOGGED_IN</code>. Defaults to <code>PUBLIC</code>.</td></tr>
       </tbody>
     </table>
   </div>
@@ -65,10 +75,24 @@ postiee post "connections only" -v CONNECTIONS`}
     </p>
   </div>
 
+  <div class="note warn">
+    <p>
+      <strong>One image only.</strong> <code>--image</code> takes a single file,
+      and that is the whole of what a self-serve app can attach. Multi-image
+      posts and video both need LinkedIn partner approval, so there is no flag
+      for them. See <a href="/postiee/docs/limits">Limits and scope</a>.
+    </p>
+  </div>
+
   <h2>history</h2>
 
   <CodeBlock code={`postiee history
 postiee history --limit 200`} />
+
+  <p>
+    Reads only the local database. No network call, no rate-limit cost.
+    <code>--limit</code> defaults to 50.
+  </p>
 
   <h2>search</h2>
 
@@ -80,25 +104,42 @@ postiee search "harness agent" --json`}
   <p>
     Terms are ANDed, so more words narrow the result. Porter stemming is on —
     <code>authentic</code> finds <code>authentication</code>.
+    <code>--limit</code> defaults to 25.
   </p>
 
   <div class="note warn">
     <p>
-      <strong>Partial-word prefixes do not work.</strong> SQLite FTS5 indexes
-      whole tokens, so <code>postiee search harn</code> will not find
-      <code>harness</code>. Use the full word.
+      <strong>Whole words only.</strong> SQLite FTS5 indexes complete tokens, so
+      <code>postiee search harn</code> will not find <code>harness</code>. Type
+      the full word. This is documented rather than worked around, because a
+      search that quietly returns nothing is worse than one that states where it
+      stops.
     </p>
   </div>
+
+  <p>
+    Search covers posts made through postiee on this machine. Anything you
+    posted from LinkedIn's app or website is invisible to every API, including
+    this one.
+  </p>
 
   <h2>forget</h2>
 
   <CodeBlock code="postiee forget urn:li:ugcPost:12345" />
 
   <p>
-    Removes the post from your local history and from the search index. It does
-    <strong>not</strong> delete anything on LinkedIn — that permission doesn't
-    exist.
+    Removes the post from your local history and from the search index. Take the
+    URN from <code>history</code>.
   </p>
+
+  <div class="note warn">
+    <p>
+      <strong>This is local only.</strong> <code>forget</code> deletes your
+      record, not the post. Nothing is removed from LinkedIn — no API deletes a
+      member's own post at any tier. To take a post down, delete it in LinkedIn
+      by hand.
+    </p>
+  </div>
 
   <h2>auth and doctor</h2>
 
@@ -108,6 +149,22 @@ postiee auth status
 postiee auth logout
 postiee doctor`}
   />
+
+  <p>
+    <code>doctor</code> is the one to run first when something looks wrong. It
+    reports where it found your config and credentials, whether a token is
+    loaded, and whether <code>api.linkedin.com</code> answers.
+  </p>
+
+  <div class="note">
+    <p>
+      <strong>Tokens last 60 days.</strong> Automatic refresh is partner-only,
+      so an expired token means one more <code>auth login</code>. If you are
+      still signed in to LinkedIn the consent screen is skipped and it takes
+      seconds. The login window stays open 15 minutes, which covers a password,
+      a 2FA prompt, and an emailed code.
+    </p>
+  </div>
 
   <h2>Agent mode</h2>
 
@@ -150,37 +207,122 @@ postiee doctor`}
     </table>
   </div>
 
-  <h2>Troubleshooting</h2>
+  <h2 id="troubleshooting">Troubleshooting</h2>
+
+  <p>
+    Most of these fail the same way: LinkedIn answers <code>401</code> or
+    <code>403</code> with a short reason, and postiee passes it through. Match
+    the first line of the error here.
+  </p>
 
   <div class="table-scroll">
     <table>
       <thead>
-        <tr><th scope="col">Error</th><th scope="col">Fix</th></tr>
+        <tr>
+          <th scope="col">What you see</th>
+          <th scope="col">Why</th>
+          <th scope="col">What to do</th>
+        </tr>
       </thead>
       <tbody>
         <tr>
           <td><code>unauthorized_scope_error</code></td>
-          <td>A requested scope isn't granted to your app. Add the product, or narrow the request with <code>POSTIEE_SCOPES</code>.</td>
+          <td>
+            Your app wasn't granted a scope postiee asked for. Share on LinkedIn
+            gives <code>w_member_social</code>; Sign In with LinkedIn gives
+            <code>openid</code> and <code>profile</code>. Both are needed.
+          </td>
+          <td>
+            Open <strong>Products</strong> on your developer app and add whichever
+            is missing. If you're mid-setup and just want to post text, set
+            <code>POSTIEE_SCOPES=w_member_social</code> to skip the rest.
+          </td>
         </tr>
         <tr>
-          <td><code>redirect_uri does not match</code></td>
-          <td>Set <code>POSTIEE_REDIRECT_URI</code> to exactly what your Auth tab shows.</td>
+          <td><code>redirect_uri does not match the registered value</code></td>
+          <td>
+            LinkedIn compares redirect URLs as exact strings — host, port, path,
+            trailing slash. <code>localhost</code> and <code>127.0.0.1</code> are
+            different values to it, and postiee sends
+            <code>127.0.0.1</code> by default.
+          </td>
+          <td>
+            Copy the exact string from your app's <strong>Auth</strong> tab into
+            <code>POSTIEE_REDIRECT_URI</code>, or re-register
+            <code>http://127.0.0.1:8085/callback</code>. <code>auth login</code>
+            prints the URI it is sending, so you can compare them directly.
+          </td>
         </tr>
         <tr>
-          <td><code>403 … userinfo</code></td>
-          <td><code>openid</code> isn't active yet. Add Sign In with LinkedIn, wait about an hour, then <code>auth logout</code> and log in again.</td>
+          <td><code>403</code> from <code>/v2/userinfo</code></td>
+          <td>
+            The token has no <code>openid</code>. Either the product was just
+            added and hasn't propagated, or you logged in before adding it.
+          </td>
+          <td>
+            Add Sign In with LinkedIn, then <code>auth logout</code> and
+            <code>auth login</code> again. A fresh token is required; the old one
+            won't gain the scope.
+          </td>
         </tr>
         <tr>
-          <td><code>422 … /author</code></td>
-          <td>Your app lacks <code>openid</code>, so the member URN can't be resolved.</td>
+          <td><code>422</code> from <code>/rest/posts</code>, mention of <code>author</code></td>
+          <td>
+            The member URN couldn't be resolved, which means the same missing
+            <code>openid</code>. It is never a bad post body.
+          </td>
+          <td>Same fix as the row above. Add the product, then re-login.</td>
         </tr>
         <tr>
           <td><code>state mismatch</code></td>
-          <td>An old login tab was used. Start <code>auth login</code> again and click the fresh URL it prints.</td>
+          <td>
+            The callback that arrived carried a different <code>state</code> than
+            the one this run generated — a stale login tab, or two logins racing.
+          </td>
+          <td>
+            Run <code>auth login</code> again and use only the URL it prints this
+            time. Don't reuse a tab from an earlier attempt.
+          </td>
         </tr>
         <tr>
-          <td>Search returns nothing</td>
-          <td>You searched a partial word. FTS5 matches whole tokens only — try <code>harness</code>, not <code>harn</code>.</td>
+          <td><code>no access token found</code></td>
+          <td>
+            No token on disk, or the one there has expired. Tokens last 60 days
+            and can't be refreshed without partner access.
+          </td>
+          <td>Run <code>auth login</code>. Confirm with <code>auth status</code>.</td>
+        </tr>
+        <tr>
+          <td><code>401</code> from any endpoint, on a token that worked yesterday</td>
+          <td>The 60 days are up.</td>
+          <td>Run <code>auth login</code>. Nothing was lost — the local history is a file on your disk, not a LinkedIn-side record.</td>
+        </tr>
+        <tr>
+          <td>Search finds nothing for a word you can see in the text</td>
+          <td>
+            FTS5 matches whole tokens. <code>harn</code> doesn't match
+            <code>harness</code>.
+          </td>
+          <td>Search the full word. Stemming handles endings — <code>authentic</code> finds <code>authentication</code>.</td>
+        </tr>
+        <tr>
+          <td>Search finds nothing and the word is complete</td>
+          <td>
+            The post was made somewhere other than postiee. Only posts postiee
+            wrote are in the index.
+          </td>
+          <td>Nothing to fix. LinkedIn exposes no API for reading posts you made in its own app.</td>
+        </tr>
+        <tr>
+          <td>Something fails only in a loop or a script</td>
+          <td>
+            You've used up the daily budget: 150 requests per member per day. One
+            post is one request.
+          </td>
+          <td>
+            Wait until the budget resets. <code>history</code> and
+            <code>search</code> are local and never count against it.
+          </td>
         </tr>
       </tbody>
     </table>

@@ -12,8 +12,8 @@ import ScopeGate from '../../components/ScopeGate.astro';
   <h1>How it works</h1>
 
   <p class="lead">
-    Three details decide whether a LinkedIn CLI works at all. Getting any of
-    them wrong produces a tool that appears to succeed and loses data.
+    Three details decide whether a LinkedIn CLI works at all. Get any of them
+    wrong and you get a tool that appears to succeed and loses data.
   </p>
 
   <h2>The post lifecycle</h2>
@@ -39,15 +39,15 @@ x-restli-id: urn:li:ugcPost:1234567890123456789
 &lt;no body&gt;</code></pre>
 
   <p>
-    A client that reads the response body finds nothing and reports success
-    anyway. Because LinkedIn will not let any API read your posts back, that ID
-    is the <em>only</em> handle you will ever have on your own post — without it
-    you cannot delete it, link to it, or record it.
+    A client that reads the body finds nothing, and if it doesn't check, reports
+    success anyway. Because LinkedIn will not let any API read your posts back,
+    that ID is the <em>only</em> handle you will ever have on your own post.
+    Lose it and the post is unreachable — not hidden, unreachable.
   </p>
 
   <p>
-    postiee treats a missing header as a hard error that tells you the post may
-    already exist, so you check before retrying rather than posting twice.
+    postiee treats a missing header as a hard error that says the post may
+    already exist. That way you check before retrying instead of posting twice.
   </p>
 
   <h2>Trap two — person IDs are scoped per app</h2>
@@ -80,11 +80,10 @@ Authorization: Bearer $TOKEN
   <pre><code>urn:li:ugcPost:12345  →  urn%3Ali%3AugcPost%3A12345</code></pre>
 
   <p>
-    Go's <code>url.PathEscape</code> does <em>not</em> do this — colons are
-    legal in a path segment, so it leaves them bare and the request 404s.
-    postiee uses <code>QueryEscape</code>, which does encode them. A test pins
-    this, because the failure looks like "the post does not exist" rather than
-    "you escaped it wrong".
+    Go's <code>url.PathEscape</code> does <em>not</em> do this — colons are legal
+    in a path segment, so it leaves them bare and the request 404s. postiee uses
+    <code>QueryEscape</code>, which does. A test pins this, because the failure
+    looks like "that post doesn't exist" rather than "you escaped it wrong".
   </p>
 
   <h2>Two more things worth knowing</h2>
@@ -92,16 +91,17 @@ Authorization: Bearer $TOKEN
   <h3>Images are two steps, not three</h3>
   <p>
     <code>initializeUpload</code> returns a signed URL <em>and</em> the final
-    image URN. You then PUT the bytes and you are done. There is no
-    <code>finalizeUpload</code> for images — that step belongs to the Videos API
-    and will confuse anyone who assumes otherwise.
+    image URN. You PUT the bytes and you are done. There is no
+    <code>finalizeUpload</code> for images — that step belongs to the Videos API,
+    and assuming otherwise is the most common way people get stuck here.
   </p>
 
   <h3>The version header is a moving target</h3>
   <p>
-    Every versioned route needs <code>Linkedin-Version: YYYYMM</code>. Versions
-    are supported for about twelve months and then sunset. It is pinned to a
-    single constant, currently <code>202609</code>.
+    Every versioned route needs <code>Linkedin-Version: YYYYMM</code>. A version
+    is supported for about twelve months and then sunset, so this is not a
+    permanent constant. postiee pins it in one place, currently
+    <code>202609</code>, which is a single-line change when LinkedIn sunsets it.
   </p>
 
   <h2>The scope gate</h2>

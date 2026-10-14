@@ -19,14 +19,16 @@ import ScopeGate from '../../components/ScopeGate.astro';
 
   <p>
     <strong>150 requests per day, per member.</strong> One post is one request.
-    Nothing you do through postiee is pooled with anyone else's — the limit is
+    Nothing you do through postiee is pooled with anyone else's — the budget is
     yours alone.
   </p>
 
   <p>
-    A script that loops will hit it, and the failure looks like an unrelated
-    error rather than a limit. Search and history are local and cost nothing
-    against this budget.
+    <code>search</code> and <code>history</code> are local and cost nothing
+    against it. Posting is what spends the budget, and a loop will spend all of
+    it in seconds. When you run out, the failure looks like an unrelated error
+    rather than a limit, so check this first when a script breaks without a
+    clear reason.
   </p>
 
   <h2>Token life</h2>
@@ -91,7 +93,7 @@ import ScopeGate from '../../components/ScopeGate.astro';
         </tr>
         <tr>
           <td>Deleting a post on LinkedIn</td>
-          <td><span class="badge no">no API exists</span> <code>forget</code> removes your local record only.</td>
+          <td><span class="badge no">no API exists</span> No endpoint exists at any tier. <code>forget</code> deletes your local record and leaves the post live.</td>
         </tr>
         <tr>
           <td>Scheduled posts</td>
@@ -99,7 +101,7 @@ import ScopeGate from '../../components/ScopeGate.astro';
         </tr>
         <tr>
           <td>Multi-image and video posts</td>
-          <td><span class="badge mid">partner approval</span> Single image works self-serve; the rest don't.</td>
+          <td><span class="badge mid">partner approval</span> One image works self-serve. <code>post --image</code> takes exactly one, and there is no flag for more.</td>
         </tr>
       </tbody>
     </table>
@@ -108,18 +110,18 @@ import ScopeGate from '../../components/ScopeGate.astro';
   <h2>Why so many omissions</h2>
 
   <p>
-    LinkedIn's API is not designed for individuals posting to their own feed. It's
-    designed for marketing platforms managing thousands of company pages — so
-    the surface that suits you, reading your posts, reacting to them, seeing how
-    they performed, is exactly the surface that requires becoming a vetted
-    partner.
+    LinkedIn's API is not built for individuals posting to their own feed. It is
+    built for marketing platforms managing thousands of company pages. So the
+    surface that would actually help you — reading your posts, reacting to them,
+    seeing how they performed — is exactly the surface that requires becoming a
+    vetted partner.
   </p>
 
   <p>
-    Shipping stubs for those would be worse than silence. A <code>comment</code>
-    command that 403s on first use teaches you nothing and wastes your time; an
-    absent command tells you the truth immediately. So the tool ships only what
-    genuinely works, and this page says plainly why the rest is out of reach.
+    A <code>comment</code> command that 403s on first use teaches you nothing and
+    wastes your afternoon. An absent command tells you the truth immediately. So
+    the tool ships only what works, and this page says why the rest is out of
+    reach.
   </p>
 
   <div class="note info">
@@ -131,6 +133,11 @@ import ScopeGate from '../../components/ScopeGate.astro';
   </div>
 
   <h2>What is guaranteed to keep working</h2>
+
+  <p>
+    These are pinned by tests in the repository, so a change that breaks one
+    fails the build rather than quietly changing behaviour.
+  </p>
 
   <div class="table-scroll">
     <table>
@@ -147,13 +154,21 @@ import ScopeGate from '../../components/ScopeGate.astro';
         <tr><td>Post ID read from the response header, not the body</td><td><span class="badge ok">pass</span></td></tr>
         <tr><td>Image upload performs exactly two calls</td><td><span class="badge ok">pass</span></td></tr>
         <tr><td>URNs in paths are fully percent-encoded</td><td><span class="badge ok">pass</span></td></tr>
-        <tr><td>Partial-word prefix search</td><td><span class="badge mid">not supported</span> Documented, not papered over.</td></tr>
       </tbody>
     </table>
   </div>
 
   <p>
-    Every row is produced by a test in the repository, not asserted by hand. Run
-    <code>go test ./...</code> to confirm.
+    Run <code>go test ./...</code> to confirm them yourself.
   </p>
+
+  <div class="note warn">
+    <p>
+      <strong>Partial-word prefix search does not work, and is not going
+      to.</strong> SQLite FTS5 indexes whole tokens, so
+      <code>search harn</code> misses <code>harness</code>. It is called out here
+      because a limit you know about is cheaper than one you find at 2am — not
+      because it is queued for support.
+    </p>
+  </div>
 </Base>
