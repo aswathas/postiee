@@ -304,8 +304,10 @@ func runOAuthLogin(cmd *cobra.Command, flags *rootFlags, clientID, clientSecret 
 	case code = <-codeCh:
 	case err := <-errCh:
 		return err
-	case <-time.After(2 * time.Minute):
-		return fmt.Errorf("authentication timed out after 2 minutes")
+	// Login can involve a password, a 2FA prompt, and an email code, so the
+	// window has to outlast a human reading it.
+	case <-time.After(15 * time.Minute):
+		return fmt.Errorf("authentication timed out after 15 minutes")
 	}
 
 	server.Shutdown(context.Background())
