@@ -1,0 +1,123 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Commands · postiee</title><meta name="description" content="Every postiee command with its flags, plus the environment variables that override defaults."><meta property="og:title" content="Commands · postiee"><meta property="og:description" content="Every postiee command with its flags, plus the environment variables that override defaults."><meta property="og:type" content="website"><link rel="icon" href="/postiee/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/postiee/_astro/about.DiDlYXAz.css"></head> <body> <a class="skip-link" href="#main">Skip to content</a> <nav class="nav" aria-label="Main"> <div class="nav__in"> <a class="brand" href="/postiee/"> <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true" fill="none"> <rect x="2" y="5" width="20" height="14" rx="3" stroke="currentColor" stroke-width="1.7"></rect> <path d="M6.5 10.5v3M10 10.5v3M13.5 10h4M13.5 14h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg>
+postiee
+</a> <button class="nav__toggle nav__toggle--docs" id="docsMenu" aria-expanded="false" aria-controls="sidebar"> <span class="sr-only">Toggle documentation menu</span> <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"> <path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path> </svg> </button> <button class="nav__toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks"> <span class="sr-only">Toggle navigation</span> <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"> <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path> </svg> </button> <div class="nav__links" id="navLinks"> <a class="nav__link" href="/postiee/docs" aria-current="page"> Docs </a><a class="nav__link" href="/postiee/docs/commands" aria-current="page"> Commands </a><a class="nav__link" href="/postiee/docs/limits"> Limits </a><a class="nav__link" href="/postiee/docs/how-it-works"> How it works </a><a class="nav__link" href="/postiee/about"> About </a> <a class="nav__link" href="https://github.com/aswathas/postiee" rel="noopener">GitHub</a> </div> </div> </nav> <main id="main">  <div class="docs"> <nav class="sidebar" id="sidebar" aria-label="Documentation"> <div class="sidebar__group"> <p class="sidebar__title">Getting started</p> <a class="sidebar__link" href="/postiee/docs" aria-current="page"> Install and set up </a><a class="sidebar__link" href="/postiee/docs/commands" aria-current="page"> Commands </a><a class="sidebar__link" href="/postiee/docs/agents"> Using an AI agent </a> </div><div class="sidebar__group"> <p class="sidebar__title">Reference</p> <a class="sidebar__link" href="/postiee/docs/limits"> Limits and scope </a><a class="sidebar__link" href="/postiee/docs/how-it-works"> How it works </a> </div><div class="sidebar__group"> <p class="sidebar__title">Project</p> <a class="sidebar__link" href="/postiee/about"> About </a> </div> </nav> <div class="prose">  <p class="eyebrow">Reference</p> <h1>Commands</h1> <p class="lead">
+Seven commands do the real work. Everything else exists because the
+    generator emitted it, and you will never need it.
+</p> <div class="table-scroll"> <table> <thead> <tr> <th scope="col">Command</th> <th scope="col">What it does</th> </tr> </thead> <tbody> <tr><td><code>post</code></td><td>Create a post and record it locally.</td></tr> <tr><td><code>history</code></td><td>Every post recorded locally, newest first.</td></tr> <tr><td><code>search</code></td><td>Full-text search over your own post bodies.</td></tr> <tr><td><code>forget</code></td><td>Remove a post from your local history only.</td></tr> <tr><td><code>unpublish</code></td><td>Delete the post on LinkedIn, then from local history. Irreversible.</td></tr> <tr><td><code>auth</code></td><td>Login, logout, status.</td></tr> <tr><td><code>doctor</code></td><td>Config, credential, and connectivity check.</td></tr> <tr><td><code>userinfo</code></td><td>Print your app-scoped member ID. See the note below.</td></tr> </tbody> </table> </div> <div class="note"> <p> <strong>You do not need <code>images</code>.</strong> It exists, but
+<code>post --image</code> already uploads and attaches in one step, and
+<code>images</code> on its own wants raw headers spelled out. Same for
+<code>userinfo</code>: it works, but it prints an identifier you never
+      type yourself.
+</p> </div> <h2>post</h2> <div class="codeblock">  <pre><code class="language-bash">postiee post &quot;some text&quot;
+postiee post --file post.md
+postiee post &quot;with a picture&quot; --image chart.png --alt &quot;a line chart&quot;
+postiee post &quot;connections only&quot; -v CONNECTIONS</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <div class="table-scroll"> <table> <thead> <tr><th scope="col">Flag</th><th scope="col">Meaning</th></tr> </thead> <tbody> <tr><td><code>--file</code></td><td>Read the body from a file. Avoids shell quoting entirely.</td></tr> <tr><td><code>--image</code></td><td>Attach one image. JPG, PNG, or GIF. One, not many — see the note below.</td></tr> <tr><td><code>--alt</code></td><td>Alt text for that image.</td></tr> <tr><td><code>-v</code>, <code>--visibility</code></td><td><code>PUBLIC</code>, <code>CONNECTIONS</code>, or <code>LOGGED_IN</code>. Defaults to <code>PUBLIC</code>.</td></tr> </tbody> </table> </div> <div class="note"> <p>
+Prefer <code>--file</code> for anything long. Quoting a multi-line post
+      through a shell is how you end up with mangled apostrophes.
+</p> </div> <div class="note warn"> <p> <strong>One image only.</strong> <code>--image</code> takes a single file,
+      and that is the whole of what a self-serve app can attach. Multi-image
+      posts and video both need LinkedIn partner approval, so there is no flag
+      for them. See <a href="/postiee/docs/limits">Limits and scope</a>.
+</p> </div> <h2>history</h2> <div class="codeblock">  <pre><code class="language-bash">postiee history
+postiee history --limit 200</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <p>
+Reads only the local database. No network call, no rate-limit cost.
+<code>--limit</code> defaults to 50.
+</p> <h2>search</h2> <div class="codeblock">  <pre><code class="language-bash">postiee search harness
+postiee search &quot;harness agent&quot; --json</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <p>
+Terms are ANDed, so more words narrow the result. Porter stemming is on —
+<code>authentic</code> finds <code>authentication</code>.
+<code>--limit</code> defaults to 25.
+</p> <div class="note warn"> <p> <strong>Whole words only.</strong> SQLite FTS5 indexes complete tokens, so
+<code>postiee search harn</code> will not find <code>harness</code>. Type
+      the full word. This is documented rather than worked around, because a
+      search that quietly returns nothing is worse than one that states where it
+      stops.
+</p> </div> <p>
+Search covers posts made through postiee on this machine. Anything you
+    posted from LinkedIn's app or website is invisible to every API, including
+    this one.
+</p> <h2>forget</h2> <div class="codeblock">  <pre><code class="language-bash">postiee forget urn:li:ugcPost:12345</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <p>
+Removes the post from your local history and from the search index. Take the
+    URN from <code>history</code>.
+</p> <div class="note warn"> <p> <strong>This is local only.</strong> <code>forget</code> deletes your
+      record, not the post. To take a post down on LinkedIn itself, use
+<code>unpublish</code>, below. That is the one write that cannot be undone.
+</p> </div> <h2>unpublish</h2> <div class="codeblock">  <pre><code class="language-bash">postiee unpublish urn:li:share:12345</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <p>
+Deletes the post on LinkedIn, then removes it from your local history. Both
+    halves, in that order — if LinkedIn refuses the delete, the local row stays
+    so the post is still findable and you can retry.
+</p> <div class="note warn"> <p> <strong>This cannot be undone.</strong> There is no trash, and no API can
+      read a post back afterwards to reconstruct it. Take the URN from
+<code>history</code> and check it before you run the command.
+</p> <p> <code>--dry-run</code> reports what it would do and stops there.
+</p> </div> <h2>auth and doctor</h2> <div class="codeblock">  <pre><code class="language-bash">postiee auth login --port 8085
+postiee auth status
+postiee auth logout
+postiee doctor</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <p> <code>doctor</code> is the one to run first when something looks wrong. It
+    reports where it found your config and credentials, whether a token is
+    loaded, and whether <code>api.linkedin.com</code> answers.
+</p> <div class="note"> <p> <strong>Tokens last 60 days.</strong> Automatic refresh is partner-only,
+      so an expired token means one more <code>auth login</code>. If you are
+      still signed in to LinkedIn the consent screen is skipped and it takes
+      seconds. The login window stays open 15 minutes, which covers a password,
+      a 2FA prompt, and an emailed code.
+</p> </div> <h2>Agent mode</h2> <div class="codeblock">  <pre><code class="language-bash">postiee --agent search harness</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <p>
+Sets <code>--json --compact --no-input --no-color</code> together. Use it
+    whenever anything is parsing the output.
+</p> <h2>Environment variables</h2> <div class="table-scroll"> <table> <thead> <tr><th scope="col">Variable</th><th scope="col">Effect</th></tr> </thead> <tbody> <tr> <td><code>POSTIEE_SCOPES</code></td> <td>Override the requested OAuth scopes. Useful during setup if Sign In with LinkedIn isn't added yet.</td> </tr> <tr> <td><code>POSTIEE_REDIRECT_URI</code></td> <td>Override the redirect host spelling. Must match your app's registration exactly.</td> </tr> <tr> <td><code>POSTIEE_TOKEN</code></td> <td>Use a specific access token instead of the stored one.</td> </tr> <tr> <td><code>POSTIEE_HISTORY_DB</code></td> <td>Point the history database somewhere else.</td> </tr> <tr> <td><code>POSTIEE_CONFIG</code></td> <td>Use a specific config file instead of the default location.</td> </tr> </tbody> </table> </div> <h2 id="troubleshooting">Troubleshooting</h2> <p>
+Most of these fail the same way: LinkedIn answers <code>401</code> or
+<code>403</code> with a short reason, and postiee passes it through. Match
+    the first line of the error here.
+</p> <div class="table-scroll"> <table> <thead> <tr> <th scope="col">What you see</th> <th scope="col">Why</th> <th scope="col">What to do</th> </tr> </thead> <tbody> <tr> <td><code>unauthorized_scope_error</code></td> <td>
+Your app wasn't granted a scope postiee asked for. Share on LinkedIn
+            gives <code>w_member_social</code>; Sign In with LinkedIn gives
+<code>openid</code> and <code>profile</code>. Both are needed.
+</td> <td>
+Open <strong>Products</strong> on your developer app and add whichever
+            is missing. If you're mid-setup and just want to post text, set
+<code>POSTIEE_SCOPES=w_member_social</code> to skip the rest.
+</td> </tr> <tr> <td><code>redirect_uri does not match the registered value</code></td> <td>
+LinkedIn compares redirect URLs as exact strings — host, port, path,
+            trailing slash. <code>localhost</code> and <code>127.0.0.1</code> are
+            different values to it, and postiee sends
+<code>127.0.0.1</code> by default.
+</td> <td>
+Copy the exact string from your app's <strong>Auth</strong> tab into
+<code>POSTIEE_REDIRECT_URI</code>, or re-register
+<code>http://127.0.0.1:8085/callback</code>. <code>auth login</code>
+prints the URI it is sending, so you can compare them directly.
+</td> </tr> <tr> <td><code>403</code> from <code>/v2/userinfo</code></td> <td>
+The token has no <code>openid</code>. Either the product was just
+            added and hasn't propagated, or you logged in before adding it.
+</td> <td>
+Add Sign In with LinkedIn, then <code>auth logout</code> and
+<code>auth login</code> again. A fresh token is required; the old one
+            won't gain the scope.
+</td> </tr> <tr> <td><code>422</code> from <code>/rest/posts</code>, mention of <code>author</code></td> <td>
+The member URN couldn't be resolved, which means the same missing
+<code>openid</code>. It is never a bad post body.
+</td> <td>Same fix as the row above. Add the product, then re-login.</td> </tr> <tr> <td><code>state mismatch</code></td> <td>
+The callback that arrived carried a different <code>state</code> than
+            the one this run generated — a stale login tab, or two logins racing.
+</td> <td>
+Run <code>auth login</code> again and use only the URL it prints this
+            time. Don't reuse a tab from an earlier attempt.
+</td> </tr> <tr> <td><code>no access token found</code></td> <td>
+No token on disk, or the one there has expired. Tokens last 60 days
+            and can't be refreshed without partner access.
+</td> <td>Run <code>auth login</code>. Confirm with <code>auth status</code>.</td> </tr> <tr> <td><code>401</code> from any endpoint, on a token that worked yesterday</td> <td>The 60 days are up.</td> <td>Run <code>auth login</code>. Nothing was lost — the local history is a file on your disk, not a LinkedIn-side record.</td> </tr> <tr> <td>Search finds nothing for a word you can see in the text</td> <td>
+FTS5 matches whole tokens. <code>harn</code> doesn't match
+<code>harness</code>.
+</td> <td>Search the full word. Stemming handles endings — <code>authentic</code> finds <code>authentication</code>.</td> </tr> <tr> <td>Search finds nothing and the word is complete</td> <td>
+The post was made somewhere other than postiee. Only posts postiee
+            wrote are in the index.
+</td> <td>Nothing to fix. LinkedIn exposes no API for reading posts you made in its own app.</td> </tr> <tr> <td>Something fails only in a loop or a script</td> <td>
+You've used up the daily budget: 150 requests per member per day. One
+            post is one request.
+</td> <td>
+Wait until the budget resets. <code>history</code> and
+<code>search</code> are local and never count against it.
+</td> </tr> </tbody> </table> </div>  </div> </div> <script type="module">const d=document.getElementById("docsMenu"),e=document.getElementById("sidebar");d?.addEventListener("click",()=>{if(!e)return;const t=e.hasAttribute("hidden");e.toggleAttribute("hidden",!t),d.setAttribute("aria-expanded",String(t))});e&&window.matchMedia("(max-width: 63.99rem)").matches&&e.setAttribute("hidden","");</script>  </main> <footer class="footer"> <p> <a href="https://github.com/aswathas/postiee">Source</a> ·
+        Built by <a href="https://github.com/aswathas">Aswath AS</a> ·
+        Apache-2.0
+</p> </footer> <script type="module">document.documentElement.classList.add("js");const c=document.getElementById("navToggle"),s=document.getElementById("navLinks");c?.addEventListener("click",()=>{const e=s?.dataset.open!=="true";s&&(s.dataset.open=String(e)),c.setAttribute("aria-expanded",String(e))});document.addEventListener("click",async e=>{const t=e.target.closest(".copy");if(!t)return;const o=t.closest(".codeblock")?.querySelector("code")?.textContent??"",n=t.querySelector(".copy__text");try{await navigator.clipboard.writeText(o),t.dataset.state="done",n&&(n.textContent="Copied")}catch{n&&(n.textContent="Ctrl+C")}setTimeout(()=>{t.dataset.state="",n&&(n.textContent="Copy")},2e3)});const a=document.querySelectorAll(".reveal");if(a.length){const e=new IntersectionObserver(t=>{for(const o of t)o.isIntersecting&&(o.target.classList.add("in"),e.unobserve(o.target))},{rootMargin:"0px 0px -12% 0px"});a.forEach(t=>e.observe(t))}</script> </body> </html>

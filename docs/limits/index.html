@@ -1,0 +1,110 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Limits and scope · postiee</title><meta name="description" content="What postiee can and cannot do, why each omission exists, and the rate limits you will actually hit."><meta property="og:title" content="Limits and scope · postiee"><meta property="og:description" content="What postiee can and cannot do, why each omission exists, and the rate limits you will actually hit."><meta property="og:type" content="website"><link rel="icon" href="/postiee/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/postiee/_astro/about.DiDlYXAz.css"></head> <body> <a class="skip-link" href="#main">Skip to content</a> <nav class="nav" aria-label="Main"> <div class="nav__in"> <a class="brand" href="/postiee/"> <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true" fill="none"> <rect x="2" y="5" width="20" height="14" rx="3" stroke="currentColor" stroke-width="1.7"></rect> <path d="M6.5 10.5v3M10 10.5v3M13.5 10h4M13.5 14h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg>
+postiee
+</a> <button class="nav__toggle nav__toggle--docs" id="docsMenu" aria-expanded="false" aria-controls="sidebar"> <span class="sr-only">Toggle documentation menu</span> <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"> <path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path> </svg> </button> <button class="nav__toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks"> <span class="sr-only">Toggle navigation</span> <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"> <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path> </svg> </button> <div class="nav__links" id="navLinks"> <a class="nav__link" href="/postiee/docs" aria-current="page"> Docs </a><a class="nav__link" href="/postiee/docs/commands"> Commands </a><a class="nav__link" href="/postiee/docs/limits" aria-current="page"> Limits </a><a class="nav__link" href="/postiee/docs/how-it-works"> How it works </a><a class="nav__link" href="/postiee/about"> About </a> <a class="nav__link" href="https://github.com/aswathas/postiee" rel="noopener">GitHub</a> </div> </div> </nav> <main id="main">  <div class="docs"> <nav class="sidebar" id="sidebar" aria-label="Documentation"> <div class="sidebar__group"> <p class="sidebar__title">Getting started</p> <a class="sidebar__link" href="/postiee/docs" aria-current="page"> Install and set up </a><a class="sidebar__link" href="/postiee/docs/commands"> Commands </a><a class="sidebar__link" href="/postiee/docs/agents"> Using an AI agent </a> </div><div class="sidebar__group"> <p class="sidebar__title">Reference</p> <a class="sidebar__link" href="/postiee/docs/limits" aria-current="page"> Limits and scope </a><a class="sidebar__link" href="/postiee/docs/how-it-works"> How it works </a> </div><div class="sidebar__group"> <p class="sidebar__title">Project</p> <a class="sidebar__link" href="/postiee/about"> About </a> </div> </nav> <div class="prose">  <p class="eyebrow">Reference</p> <h1>Limits and scope</h1> <p class="lead">
+The list of things this can't do is longer than the list of things it can.
+    That's deliberate, and every omission has a reason.
+</p> <h2>The rate limit</h2> <p> <strong>150 requests per day, per member.</strong> One post is one request.
+    Nothing you do through postiee is pooled with anyone else's — the budget is
+    yours alone.
+</p> <p> <code>search</code> and <code>history</code> are local and cost nothing
+    against it. Posting is what spends the budget, and a loop will spend all of
+    it in seconds. When you run out, the failure looks like an unrelated error
+    rather than a limit, so check this first when a script breaks without a
+    clear reason.
+</p> <h2>Token life</h2> <p>
+Access tokens last <strong>60 days</strong>. Refreshing them automatically
+    is reserved for LinkedIn partners, so you re-run <code>auth login</code>.
+    If you're still signed in, the consent screen is skipped and it takes
+    seconds.
+</p> <p> <strong>Deleting your own post is not on this list.</strong> <code>unpublish</code> deletes it on LinkedIn, using the same self-serve
+<code>w_member_social</code> scope that posting already needs. Only
+<em>reading</em> posts back requires the closed
+<code>r_member_social</code>. See
+<a href="/postiee/docs/commands">Commands</a>.
+</p> <h2>What postiee can't do</h2> <figure> <svg viewBox="0 0 720 480" role="img" aria-labelledby="gate-title gate-desc"> <title id="gate-title">The three-tier LinkedIn scope gate</title> <desc id="gate-desc">
+Tier one, self-serve, granted immediately by the Share on LinkedIn and Sign
+    In with LinkedIn products: posting and identifying yourself. Tier two,
+    Community Management API, requires vetted partner approval: comments,
+    reactions, analytics, reading posts back. Tier three, closed entirely, no
+    public API at any tier: messaging and connection invitations.
+</desc> <rect width="720" height="480" fill="#000000" rx="6"></rect> <!-- Tier 1 --> <rect x="24" y="24" width="672" height="128" rx="6" fill="#0a1a0d" stroke="#30d158" stroke-width="1.5"></rect> <text x="44" y="52" fill="#30d158" font-family="ui-monospace, monospace" font-size="14" font-weight="700">
+TIER 1 — SELF-SERVE
+</text> <text x="44" y="72" fill="#a1a1a6" font-family="ui-monospace, monospace" font-size="11">
+Granted instantly. No review, no payment.
+</text> <rect x="44" y="88" width="200" height="48" rx="4" fill="#121215" stroke="#2a2f3a"></rect> <text x="58" y="108" fill="#f5f5f7" font-family="ui-monospace, monospace" font-size="11" font-weight="600">
+w_member_social
+</text> <text x="58" y="125" fill="#a1a1a6" font-family="ui-monospace, monospace" font-size="12">
+create a post
+</text> <rect x="256" y="88" width="200" height="48" rx="4" fill="#121215" stroke="#2a2f3a"></rect> <text x="270" y="108" fill="#f5f5f7" font-family="ui-monospace, monospace" font-size="11" font-weight="600">
+openid + profile
+</text> <text x="270" y="125" fill="#a1a1a6" font-family="ui-monospace, monospace" font-size="12">
+identify yourself
+</text> <rect x="468" y="88" width="212" height="48" rx="4" fill="#0a1a0d" stroke="#30d158"></rect> <text x="482" y="108" fill="#30d158" font-family="ui-monospace, monospace" font-size="11" font-weight="600">
+✓ postiee works here
+</text> <text x="482" y="125" fill="#a1a1a6" font-family="ui-monospace, monospace" font-size="12">
+post · history · search
+</text> <!-- Tier 2 --> <rect x="24" y="168" width="672" height="144" rx="6" fill="#1c1808" stroke="#ffd60a" stroke-width="1.5"></rect> <text x="44" y="196" fill="#ffd60a" font-family="ui-monospace, monospace" font-size="14" font-weight="700">
+TIER 2 — COMMUNITY MANAGEMENT
+</text> <text x="44" y="216" fill="#a1a1a6" font-family="ui-monospace, monospace" font-size="11">
+Vetted partner review. Requires a business, legal entity, and an
+    agreement to the Marketing API terms.
+</text> <rect x="44" y="232" width="200" height="48" rx="4" fill="#121215" stroke="#2a2f3a"></rect> <text x="58" y="252" fill="#f5f5f7" font-family="ui-monospace, monospace" font-size="11" font-weight="600">
+w_member_social_feed
+</text> <text x="58" y="269" fill="#a1a1a6" font-family="ui-monospace, monospace" font-size="12">
+comment · react
+</text> <rect x="256" y="232" width="200" height="48" rx="4" fill="#121215" stroke="#2a2f3a"></rect> <text x="270" y="252" fill="#f5f5f7" font-family="ui-monospace, monospace" font-size="11" font-weight="600">
+r_member_postAnalytics
+</text> <text x="270" y="269" fill="#a1a1a6" font-family="ui-monospace, monospace" font-size="12">
+impressions · followers
+</text> <rect x="468" y="232" width="212" height="48" rx="4" fill="#1c0e0e" stroke="#ff6961"></rect> <text x="482" y="252" fill="#ff6961" font-family="ui-monospace, monospace" font-size="11" font-weight="600">
+✗ not in postiee
+</text> <text x="482" y="269" fill="#a1a1a6" font-family="ui-monospace, monospace" font-size="12">
+would 403 on first use
+</text> <rect x="44" y="286" width="636" height="32" rx="3" fill="#121215" stroke="#2a2f3a"></rect> <!-- SVG <text> does not wrap: a newline inside one element collapses to a
+       space and the whole run overflows the viewBox. Two positioned tspans. --> <text x="54" y="298" fill="#ff6961" font-family="ui-monospace, monospace" font-size="12"> <tspan x="54" y="298">r_member_social — reading your OWN posts — is CLOSED, not gated.</tspan> <tspan x="54" y="312">Not accepting requests at this time.</tspan> </text> <!-- Tier 3 --> <rect x="24" y="328" width="672" height="128" rx="6" fill="#1c0e0e" stroke="#ff6961" stroke-width="1.5"></rect> <text x="44" y="356" fill="#ff6961" font-family="ui-monospace, monospace" font-size="14" font-weight="700">
+TIER 3 — CLOSED AT EVERY TIER
+</text> <text x="44" y="376" fill="#a1a1a6" font-family="ui-monospace, monospace" font-size="11">
+No product in the developer catalogue. No endpoint in the docs. Explicitly
+    prohibited use.
+</text> <rect x="44" y="392" width="200" height="48" rx="4" fill="#121215" stroke="#2a2f3a"></rect> <text x="58" y="412" fill="#f5f5f7" font-family="ui-monospace, monospace" font-size="11" font-weight="600">
+messaging
+</text> <text x="58" y="429" fill="#a1a1a6" font-family="ui-monospace, monospace" font-size="12">
+no DM API exists
+</text> <rect x="256" y="392" width="200" height="48" rx="4" fill="#121215" stroke="#2a2f3a"></rect> <text x="270" y="412" fill="#f5f5f7" font-family="ui-monospace, monospace" font-size="11" font-weight="600">
+invitations
+</text> <text x="270" y="429" fill="#a1a1a6" font-family="ui-monospace, monospace" font-size="12">
+no networking API
+</text> <rect x="468" y="392" width="212" height="48" rx="4" fill="#1c0e0e" stroke="#ff6961"></rect> <text x="482" y="412" fill="#ff6961" font-family="ui-monospace, monospace" font-size="11" font-weight="600">
+✗ never implementable
+</text> <text x="482" y="429" fill="#a1a1a6" font-family="ui-monospace, monospace" font-size="12">
+at any access level
+</text> </svg> <figcaption>
+Three tiers. postiee operates entirely inside the first.
+</figcaption> </figure> <div class="table-scroll"> <table> <thead> <tr><th scope="col">Capability</th><th scope="col">Status</th></tr> </thead> <tbody> <tr> <td>Comments</td> <td><span class="badge mid">partner approval</span> Needs the Community Management API.</td> </tr> <tr> <td>Reactions and likes</td> <td><span class="badge mid">partner approval</span> Same.</td> </tr> <tr> <td>Analytics — impressions, followers, profile views</td> <td><span class="badge mid">partner approval</span> Separate member analytics scopes.</td> </tr> <tr> <td>Reading your own posts back</td> <td><span class="badge no">closed</span> <code>r_member_social</code> isn't accepting requests.</td> </tr> <tr> <td>Reading who reacted to a post</td> <td><span class="badge no">closed</span> Reaction identities are never returned to a member app.</td> </tr> <tr> <td>Messaging and DMs</td> <td><span class="badge no">no API exists</span> No endpoint in the docs. Mass messaging is an explicit prohibited use.</td> </tr> <tr> <td>Connection invitations</td> <td><span class="badge no">no API exists</span> Same.</td> </tr> <tr> <td>Looking up another member's profile</td> <td><span class="badge no">no API exists</span> Person IDs are app-scoped, so there's no way to resolve someone else's.</td> </tr> <tr> <td>Running ads</td> <td><span class="badge no">separate product</span> The Marketing API is a different platform with its own approval.</td> </tr> <tr> <td>Scheduled posts</td> <td><span class="badge mid">client-side only</span> No <code>publishAt</code> field exists. Scheduling means a local timer.</td> </tr> <tr> <td>Multi-image and video posts</td> <td><span class="badge mid">partner approval</span> One image works self-serve. <code>post --image</code> takes exactly one, and there is no flag for more.</td> </tr> </tbody> </table> </div> <h2>Why so many omissions</h2> <p>
+LinkedIn's API is not built for individuals posting to their own feed. It is
+    built for marketing platforms managing thousands of company pages. So the
+    surface that would actually help you — reading your posts, reacting to them,
+    seeing how they performed — is exactly the surface that requires becoming a
+    vetted partner.
+</p> <p>
+A <code>comment</code> command that 403s on first use teaches you nothing and
+    wastes your afternoon. An absent command tells you the truth immediately. So
+    the tool ships only what works, and this page says why the rest is out of
+    reach.
+</p> <div class="note info"> <p> <strong>If LinkedIn ever opens one of these</strong>, the architecture will
+      take it. The local history already stores what a comments table would need
+      — the post URN is the join key.
+</p> </div> <h2>What is guaranteed to keep working</h2> <p>
+These are pinned by tests in the repository, so a change that breaks one
+    fails the build rather than quietly changing behaviour.
+</p> <div class="table-scroll"> <table> <thead> <tr><th scope="col">Property</th><th scope="col">Status</th></tr> </thead> <tbody> <tr><td>Porter stemming — <code>authentic</code> finds <code>authentication</code></td><td><span class="badge ok">pass</span></td></tr> <tr><td>Multi-term AND narrows rather than widens</td><td><span class="badge ok">pass</span></td></tr> <tr><td>An absent term returns nothing</td><td><span class="badge ok">pass</span></td></tr> <tr><td>Junk input never errors — <code>"</code>, <code>AND</code>, <code>()</code>, <code>NEAR(a b)</code>, <code>--</code></td><td><span class="badge ok">pass</span></td></tr> <tr><td>Re-recording a post upserts instead of duplicating</td><td><span class="badge ok">pass</span></td></tr> <tr><td>Deleting removes the search index entry too</td><td><span class="badge ok">pass</span></td></tr> <tr><td>Deleting on LinkedIn sends <code>X-RestLi-Method: DELETE</code></td><td><span class="badge ok">pass</span></td></tr> <tr><td>Deleting an already-deleted post is accepted, not an error</td><td><span class="badge ok">pass</span></td></tr> <tr><td>Post ID read from the response header, not the body</td><td><span class="badge ok">pass</span></td></tr> <tr><td>Image upload performs exactly two calls</td><td><span class="badge ok">pass</span></td></tr> <tr><td>URNs in paths are fully percent-encoded</td><td><span class="badge ok">pass</span></td></tr> </tbody> </table> </div> <p>
+Run <code>go test ./...</code> to confirm them yourself.
+</p> <div class="note warn"> <p> <strong>Partial-word prefix search does not work, and is not going
+      to.</strong> SQLite FTS5 indexes whole tokens, so
+<code>search harn</code> misses <code>harness</code>. It is called out here
+      because a limit you know about is cheaper than one you find at 2am — not
+      because it is queued for support.
+</p> </div>  </div> </div> <script type="module">const d=document.getElementById("docsMenu"),e=document.getElementById("sidebar");d?.addEventListener("click",()=>{if(!e)return;const t=e.hasAttribute("hidden");e.toggleAttribute("hidden",!t),d.setAttribute("aria-expanded",String(t))});e&&window.matchMedia("(max-width: 63.99rem)").matches&&e.setAttribute("hidden","");</script>  </main> <footer class="footer"> <p> <a href="https://github.com/aswathas/postiee">Source</a> ·
+        Built by <a href="https://github.com/aswathas">Aswath AS</a> ·
+        Apache-2.0
+</p> </footer> <script type="module">document.documentElement.classList.add("js");const c=document.getElementById("navToggle"),s=document.getElementById("navLinks");c?.addEventListener("click",()=>{const e=s?.dataset.open!=="true";s&&(s.dataset.open=String(e)),c.setAttribute("aria-expanded",String(e))});document.addEventListener("click",async e=>{const t=e.target.closest(".copy");if(!t)return;const o=t.closest(".codeblock")?.querySelector("code")?.textContent??"",n=t.querySelector(".copy__text");try{await navigator.clipboard.writeText(o),t.dataset.state="done",n&&(n.textContent="Copied")}catch{n&&(n.textContent="Ctrl+C")}setTimeout(()=>{t.dataset.state="",n&&(n.textContent="Copy")},2e3)});const a=document.querySelectorAll(".reveal");if(a.length){const e=new IntersectionObserver(t=>{for(const o of t)o.isIntersecting&&(o.target.classList.add("in"),e.unobserve(o.target))},{rootMargin:"0px 0px -12% 0px"});a.forEach(t=>e.observe(t))}</script> </body> </html>

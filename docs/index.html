@@ -1,0 +1,107 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Install and set up · postiee</title><meta name="description" content="Install postiee, create your own LinkedIn app, store credentials, and log in. Ten minutes the first time."><meta property="og:title" content="Install and set up · postiee"><meta property="og:description" content="Install postiee, create your own LinkedIn app, store credentials, and log in. Ten minutes the first time."><meta property="og:type" content="website"><link rel="icon" href="/postiee/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/postiee/_astro/about.DiDlYXAz.css"></head> <body> <a class="skip-link" href="#main">Skip to content</a> <nav class="nav" aria-label="Main"> <div class="nav__in"> <a class="brand" href="/postiee/"> <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true" fill="none"> <rect x="2" y="5" width="20" height="14" rx="3" stroke="currentColor" stroke-width="1.7"></rect> <path d="M6.5 10.5v3M10 10.5v3M13.5 10h4M13.5 14h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg>
+postiee
+</a> <button class="nav__toggle nav__toggle--docs" id="docsMenu" aria-expanded="false" aria-controls="sidebar"> <span class="sr-only">Toggle documentation menu</span> <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"> <path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path> </svg> </button> <button class="nav__toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks"> <span class="sr-only">Toggle navigation</span> <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"> <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path> </svg> </button> <div class="nav__links" id="navLinks"> <a class="nav__link" href="/postiee/docs" aria-current="page"> Docs </a><a class="nav__link" href="/postiee/docs/commands"> Commands </a><a class="nav__link" href="/postiee/docs/limits"> Limits </a><a class="nav__link" href="/postiee/docs/how-it-works"> How it works </a><a class="nav__link" href="/postiee/about"> About </a> <a class="nav__link" href="https://github.com/aswathas/postiee" rel="noopener">GitHub</a> </div> </div> </nav> <main id="main">  <div class="docs"> <nav class="sidebar" id="sidebar" aria-label="Documentation"> <div class="sidebar__group"> <p class="sidebar__title">Getting started</p> <a class="sidebar__link" href="/postiee/docs" aria-current="page"> Install and set up </a><a class="sidebar__link" href="/postiee/docs/commands"> Commands </a><a class="sidebar__link" href="/postiee/docs/agents"> Using an AI agent </a> </div><div class="sidebar__group"> <p class="sidebar__title">Reference</p> <a class="sidebar__link" href="/postiee/docs/limits"> Limits and scope </a><a class="sidebar__link" href="/postiee/docs/how-it-works"> How it works </a> </div><div class="sidebar__group"> <p class="sidebar__title">Project</p> <a class="sidebar__link" href="/postiee/about"> About </a> </div> </nav> <div class="prose">  <p class="eyebrow">Getting started</p> <h1>Install and set up</h1> <p class="lead">
+Ten minutes the first time, because you have to create your own LinkedIn
+    app. Every step after that is one command.
+</p> <h2>1. Install</h2> <p>
+The installers detect your OS and CPU, prefer a per-user location so you
+    don't need admin rights, and warn you if the install directory isn't on your
+<code>PATH</code>.
+</p> <div class="codeblock"> <div class="install__label"> <span>macOS · Linux</span> </div> <pre><code class="language-bash">curl -fsSL https://raw.githubusercontent.com/aswathas/postiee/main/install.sh | sh</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <div class="codeblock"> <div class="install__label"> <span>Windows · PowerShell</span> </div> <pre><code class="language-bash">irm https://raw.githubusercontent.com/aswathas/postiee/main/install.ps1 | iex</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <h3>From source</h3> <p>Needs Go 1.26.9 or newer. The <code>sudo mv</code> is the only step that
+  needs admin rights; build it anywhere you like.</p> <div class="codeblock">  <pre><code class="language-bash">git clone https://github.com/aswathas/postiee.git
+cd postiee
+go build -o postiee ./cmd/postiee
+sudo mv postiee /usr/local/bin/</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <div class="note info"> <p> <strong>No Go toolchain needed</strong> for the one-liners — those download
+      a prebuilt binary for your platform.
+</p> </div> <h2>2. Create your LinkedIn app</h2> <p>
+There is no shared client ID. Every person needs their own app, because
+    LinkedIn grants scopes per application. Both products below are required:
+    one lets you post, the other lets postiee work out who you are.
+</p> <ol> <li>
+Go to
+<a href="https://www.linkedin.com/developers/apps">linkedin.com/developers/apps</a>
+and click <strong>Create app</strong>.
+</li> <li> <strong>Products</strong> tab → add <strong>Share on LinkedIn</strong>.
+      This grants <code>w_member_social</code>, which is what writes the post.
+      Self-serve, no review.
+</li> <li> <strong>Products</strong> tab → add <strong>Sign In with LinkedIn</strong>.
+      This grants <code>openid</code> and <code>profile</code>. Without it
+      postiee cannot resolve your own member ID, and every post fails.
+</li> <li> <strong>Auth</strong> tab → add this exact redirect URL:
+</li> </ol> <pre><code>http://127.0.0.1:8085/callback</code></pre> <div class="note warn"> <p> <strong>Copy that exactly, including <code>127.0.0.1</code>.</strong>
+LinkedIn compares redirect URLs as exact strings, and
+<code>localhost</code> is not the same value to it as
+<code>127.0.0.1</code>. Registering <code>localhost</code> is the single
+      most common reason login fails with
+<em>"redirect_uri does not match the registered value"</em>.
+</p> <p>
+If you already registered a different value, set
+<code>POSTIEE_REDIRECT_URI</code> to match it instead.
+<code>auth login</code> prints the exact URI it is sending before it opens
+      your browser, so you can compare the two directly.
+</p> </div> <p>
+Back on the <strong>Settings</strong> tab you'll see a <strong>Client ID</strong>
+and <strong>Client secret</strong>. You need both.
+</p> <div class="note warn"> <p> <strong>Never paste either value into a chat, an issue, or a commit.</strong>
+The secret is a password for your app. The next step puts them in a local
+      file that nothing else can read.
+</p> </div> <h2>3. Store your credentials</h2> <p>
+Write them to a file rather than passing them as flags — a flag value lands
+    in your shell history and in process listings.
+</p> <div class="codeblock">  <pre><code class="language-bash">mkdir -p ~/.config/postiee
+chmod 700 ~/.config/postiee
+
+cat &gt; ~/.config/postiee/credentials.toml &lt;&lt;&#39;EOF&#39;
+client_id = &quot;your_client_id&quot;
+client_secret = &quot;your_client_secret&quot;
+EOF
+
+chmod 600 ~/.config/postiee/credentials.toml</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <p>
+On Windows the same file lives at
+<code>%USERPROFILE%\.config\postiee\credentials.toml</code>.
+</p> <h2>4. Log in</h2> <div class="codeblock">  <pre><code class="language-bash">postiee auth login --port 8085</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <p>
+Your browser opens, you approve, and the token is stored. postiee prints the
+    exact redirect URI it is sending before it opens the browser — compare it
+    against your Auth tab if login fails. The window stays open 15 minutes,
+    which is enough for a password, a 2FA prompt, and an email code.
+</p> <div class="note"> <p> <strong>Token life is 60 days.</strong> Programmatic refresh is reserved
+      for LinkedIn partners, so after expiry you re-run <code>auth login</code>.
+      If you're still signed in to LinkedIn, the consent screen is skipped.
+</p> </div> <h2>5. Check it works</h2> <div class="codeblock">  <pre><code class="language-bash">postiee doctor
+postiee auth status</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <p> <code>doctor</code> reports where it found your config and credentials,
+    whether a token is loaded, and whether <code>api.linkedin.com</code> is
+    reachable. <code>auth status</code> confirms the token in one line.
+</p> <p>Then make the post that proves it:</p> <div class="codeblock">  <pre><code class="language-bash">postiee post &quot;first post via postiee&quot; -v CONNECTIONS</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <div class="note info"> <p>
+It prints a permalink and the post is on your feed. Nothing on LinkedIn
+      can show you that record later — from here on,
+<code>postiee history</code> is how you find it. That is the whole reason
+      this tool exists.
+</p> </div> <h2>6. Take it back down</h2> <p>
+If you want the test post gone, <code>unpublish</code> deletes it on
+    LinkedIn and then removes it from your local history. The URN is in the
+    output of the post you just made.
+</p> <div class="codeblock">  <pre><code class="language-bash">postiee unpublish urn:li:share:12345 --dry-run   # see what it would do
+postiee unpublish urn:li:share:12345</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <div class="note warn"> <p> <strong>This one is permanent.</strong> There is no undo, and no API can
+      read a deleted post back to rebuild it. <code>--dry-run</code> prints the
+      plan without touching anything.
+</p> <p>
+If you only want it out of your local search results and not off LinkedIn,
+      use <code>forget</code> instead. See
+<a href="/postiee/docs/commands">Commands</a>.
+</p> </div> <h2>Where your files live</h2> <div class="table-scroll"> <table> <thead> <tr> <th scope="col">What</th> <th scope="col">macOS / Linux</th> <th scope="col">Windows</th> </tr> </thead> <tbody> <tr> <td>App credentials — you write these</td> <td><code>~/.config/postiee/credentials.toml</code></td> <td><code>%USERPROFILE%\.config\postiee\credentials.toml</code></td> </tr> <tr> <td>Access token — postiee writes this after login</td> <td><code>~/.local/share/postiee/</code></td> <td><code>%USERPROFILE%\.local\share\postiee\</code></td> </tr> <tr> <td>History database</td> <td><code>~/.config/postiee/history.db</code></td> <td><code>%USERPROFILE%\.config\postiee\history.db</code></td> </tr> </tbody> </table> </div> <p> <code>postiee doctor</code> prints the resolved path of each one, so you
+    never have to guess.
+</p> <div class="note warn"> <p> <strong>Back up <code>history.db</code>.</strong> It is the only surviving
+      record of your posts — see <a href="/postiee/about">why</a>. Copying one
+      file is the whole backup.
+</p> </div> <h2>If something goes wrong</h2> <p>
+Run <code>postiee doctor</code> first; it names what it found and what it
+    couldn't. Then the
+<a href="/postiee/docs/commands#troubleshooting">troubleshooting table</a>
+maps LinkedIn's error text to a fix.
+</p> <h2>Next</h2> <p> <a href="/postiee/docs/commands">Commands</a> — every command and flag, or
+    the <a href="/postiee/docs/limits">limits page</a> to find out what this
+    can't do before you rely on it.
+</p>  </div> </div> <script type="module">const d=document.getElementById("docsMenu"),e=document.getElementById("sidebar");d?.addEventListener("click",()=>{if(!e)return;const t=e.hasAttribute("hidden");e.toggleAttribute("hidden",!t),d.setAttribute("aria-expanded",String(t))});e&&window.matchMedia("(max-width: 63.99rem)").matches&&e.setAttribute("hidden","");</script>  </main> <footer class="footer"> <p> <a href="https://github.com/aswathas/postiee">Source</a> ·
+        Built by <a href="https://github.com/aswathas">Aswath AS</a> ·
+        Apache-2.0
+</p> </footer> <script type="module">document.documentElement.classList.add("js");const c=document.getElementById("navToggle"),s=document.getElementById("navLinks");c?.addEventListener("click",()=>{const e=s?.dataset.open!=="true";s&&(s.dataset.open=String(e)),c.setAttribute("aria-expanded",String(e))});document.addEventListener("click",async e=>{const t=e.target.closest(".copy");if(!t)return;const o=t.closest(".codeblock")?.querySelector("code")?.textContent??"",n=t.querySelector(".copy__text");try{await navigator.clipboard.writeText(o),t.dataset.state="done",n&&(n.textContent="Copied")}catch{n&&(n.textContent="Ctrl+C")}setTimeout(()=>{t.dataset.state="",n&&(n.textContent="Copy")},2e3)});const a=document.querySelectorAll(".reveal");if(a.length){const e=new IntersectionObserver(t=>{for(const o of t)o.isIntersecting&&(o.target.classList.add("in"),e.unobserve(o.target))},{rootMargin:"0px 0px -12% 0px"});a.forEach(t=>e.observe(t))}</script> </body> </html>

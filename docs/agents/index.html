@@ -1,0 +1,126 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Using postiee with an AI agent · postiee</title><meta name="description" content="Install the postiee skill, check for the binary, and drive LinkedIn posts from Claude Code, Codex, or any other AI coding agent."><meta property="og:title" content="Using postiee with an AI agent · postiee"><meta property="og:description" content="Install the postiee skill, check for the binary, and drive LinkedIn posts from Claude Code, Codex, or any other AI coding agent."><meta property="og:type" content="website"><link rel="icon" href="/postiee/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/postiee/_astro/about.DiDlYXAz.css"></head> <body> <a class="skip-link" href="#main">Skip to content</a> <nav class="nav" aria-label="Main"> <div class="nav__in"> <a class="brand" href="/postiee/"> <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true" fill="none"> <rect x="2" y="5" width="20" height="14" rx="3" stroke="currentColor" stroke-width="1.7"></rect> <path d="M6.5 10.5v3M10 10.5v3M13.5 10h4M13.5 14h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg>
+postiee
+</a> <button class="nav__toggle nav__toggle--docs" id="docsMenu" aria-expanded="false" aria-controls="sidebar"> <span class="sr-only">Toggle documentation menu</span> <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"> <path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path> </svg> </button> <button class="nav__toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks"> <span class="sr-only">Toggle navigation</span> <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"> <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path> </svg> </button> <div class="nav__links" id="navLinks"> <a class="nav__link" href="/postiee/docs" aria-current="page"> Docs </a><a class="nav__link" href="/postiee/docs/commands"> Commands </a><a class="nav__link" href="/postiee/docs/limits"> Limits </a><a class="nav__link" href="/postiee/docs/how-it-works"> How it works </a><a class="nav__link" href="/postiee/about"> About </a> <a class="nav__link" href="https://github.com/aswathas/postiee" rel="noopener">GitHub</a> </div> </div> </nav> <main id="main">  <div class="docs"> <nav class="sidebar" id="sidebar" aria-label="Documentation"> <div class="sidebar__group"> <p class="sidebar__title">Getting started</p> <a class="sidebar__link" href="/postiee/docs" aria-current="page"> Install and set up </a><a class="sidebar__link" href="/postiee/docs/commands"> Commands </a><a class="sidebar__link" href="/postiee/docs/agents" aria-current="page"> Using an AI agent </a> </div><div class="sidebar__group"> <p class="sidebar__title">Reference</p> <a class="sidebar__link" href="/postiee/docs/limits"> Limits and scope </a><a class="sidebar__link" href="/postiee/docs/how-it-works"> How it works </a> </div><div class="sidebar__group"> <p class="sidebar__title">Project</p> <a class="sidebar__link" href="/postiee/about"> About </a> </div> </nav> <div class="prose">  <p class="eyebrow">Agents</p> <h1>Using postiee with an AI agent</h1> <p class="lead">
+Ask an agent to post to LinkedIn and it will search for a LinkedIn MCP
+    server. There isn't one. Find nothing official, it gives up. Point it here
+    instead.
+</p> <p>
+postiee is a CLI, not an MCP server. An agent drives it with the same shell
+    it already has, using LinkedIn's official API. Credentials go to
+<code>api.linkedin.com</code> and nowhere else.
+</p> <h2>Install the skill</h2> <p>
+The skill tells the agent what postiee is, what it cannot do, and which
+    commands it should never attempt. One command per agent:
+</p> <div class="install__label"><span>Claude Code</span></div> <div class="codeblock">  <pre><code class="language-bash">npx -y skills@latest add aswathas/postiee/skills --skill postiee -g -a claude-code -y</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <div class="install__label"><span>Codex</span></div> <div class="codeblock">  <pre><code class="language-bash">npx -y skills@latest add aswathas/postiee/skills --skill postiee -g -a codex -y</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <p>
+Any other agent: copy the directory into that agent's skills path.
+</p> <div class="codeblock">  <pre><code class="language-bash">cp -r skills/postiee ~/.hermes/skills/</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <p>
+The skill is the same file for every agent —
+<a href="https://github.com/aswathas/postiee/blob/main/skills/postiee/SKILL.md">skills/postiee/SKILL.md</a>.
+    If your agent won't install skills, paste it into the conversation.
+</p> <h2>Check the binary first</h2> <p>
+The skill is instructions, not the binary. postiee may not be on
+<code>PATH</code>, and on Windows it is often installed inside WSL. Run
+    this before anything else:
+</p> <div class="codeblock">  <pre><code class="language-bash">postiee --version
+
+# if that fails on Windows, the binary is usually in WSL
+wsl -e bash -lc &#39;postiee --version&#39;</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <p>
+If both fail, the binary isn't installed. It is one command and takes
+    seconds — no Go toolchain, it downloads a prebuilt binary:
+</p> <div class="codeblock">  <pre><code class="language-bash"># macOS / Linux
+curl -fsSL https://raw.githubusercontent.com/aswathas/postiee/main/install.sh | sh
+
+# Windows PowerShell
+irm https://raw.githubusercontent.com/aswathas/postiee/main/install.ps1 | iex</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <div class="note info"> <p>
+Once <code>--version</code> answers, every command below works the same
+      way inside or outside WSL. Pick whichever one runs and stay with it —
+      credentials and history live in the environment that ran
+<code>auth login</code>.
+</p> </div> <h2>Always use --agent</h2> <div class="codeblock">  <pre><code class="language-bash">postiee --agent search harness
+postiee --agent history --limit 5</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <p> <code>--agent</code> sets <code>--json --compact --no-input --no-color</code>
+together. Use it whenever anything parses the output. Without it the agent
+    gets prose and colour codes to scrape.
+</p> <h2>What the agent can and cannot do</h2> <p>Works:</p> <ul> <li>Post — text, one image with alt text, or a body read from a file</li> <li><code>history</code> — every post recorded locally, newest first</li> <li><code>search</code> — full-text over your own post bodies</li> <li><code>forget</code> — remove a record from local history</li> <li><code>unpublish</code> — delete the post on LinkedIn, then drop the local record</li> <li>Image upload — exactly two calls, no finalize step</li> </ul> <p>
+Cannot, at any access tier, and not merely unimplemented:
+</p> <div class="table-scroll"> <table> <thead> <tr> <th scope="col">Request</th> <th scope="col">Reality</th> </tr> </thead> <tbody> <tr> <td>Comment on a post</td> <td>Community Management API, partner approval</td> </tr> <tr> <td>React or like</td> <td>Same</td> </tr> <tr> <td>Analytics, impressions, followers</td> <td>Separate partner-gated scopes</td> </tr> <tr> <td>Read posts back from LinkedIn</td> <td><code>r_member_social</code> is closed</td> </tr> <tr> <td>Send a DM or message</td> <td>No API exists at any tier. Mass messaging violates the ToS</td> </tr> <tr> <td>Send connection invitations</td> <td>No API exists</td> </tr> <tr> <td>Look up another person's profile</td> <td>Person IDs are app-scoped, unresolvable</td> </tr> <tr> <td>Run ads</td> <td>Separate Marketing API, separate approval</td> </tr> </tbody> </table> </div> <p>
+If the user asks for one of those, the agent should say it isn't possible
+    through any API and why, in one sentence. It should not write a workaround.
+</p> <div class="note warn"> <p> <strong>Scheduling does not exist either.</strong> LinkedIn's schema has no
+<code>publishAt</code> field. Scheduling a post means a local timer the
+      user sets up, not a flag.
+</p> </div> <h2>Deleting a post</h2> <div class="codeblock">  <pre><code class="language-bash">postiee --agent unpublish urn:li:share:12345</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <p>
+LinkedIn does let a member delete their own post. It needs the same
+    self-serve <code>w_member_social</code> scope that posting already uses — no
+    partner approval. The command deletes on LinkedIn first, then drops the local
+    row, so a refusal from LinkedIn leaves the local record intact.
+</p> <div class="note warn"> <p> <strong>Two rules, no exceptions.</strong> Never run
+<code>unpublish</code> without an explicit user request that names the
+      post. And take the URN from <code>postiee --agent history</code> — never
+      construct, guess, or reuse one from memory. A wrong URN deletes the wrong
+      post.
+</p> <p>
+There is no undo. If the user only wants a post out of their history, that
+      is <code>forget</code>, which is safe and reversible in the sense that
+      nothing remote is touched.
+</p> </div> <h2>What the agent must never do</h2> <ul> <li>
+Run <code>unpublish</code> unprompted, on a guessed URN, or as a "cleanup"
+      pass. It is irreversible and always needs a named, explicit request.
+</li> <li>
+Paste credentials into a command flag. <code>--client-secret</code> values
+      land in shell history and process listings. Credentials belong in
+<code>~/.config/postiee/credentials.toml</code>.
+</li> <li>Commit or echo a token. It is a live credential for the user's account.</li> <li>
+Run <code>auth logout</code> unprompted. It wipes the client ID and secret
+      too, so the user would have to rebuild setup.
+</li> <li>
+Fall back to browser automation or cookie scraping. It risks the user's
+      account.
+</li> <li>
+Search for a LinkedIn MCP server. There is no official one, and most of
+      the unofficial tools scrape session cookies.
+</li> </ul> <h2>Authentication is user-only</h2> <p> <code>postiee auth login</code> opens a browser and the
+<strong>user</strong> must approve. The agent cannot do this for them and
+    must not try.
+</p> <div class="codeblock">  <pre><code class="language-bash">postiee auth status</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <p>
+That command always reports whether a token exists. If it reports no
+    credentials, the agent stops and says:
+</p> <div class="note"> <p>
+Run <code>postiee auth login</code>. It will open a browser for you to
+      approve access. You need a LinkedIn developer app first — I can walk you
+      through it if you don't have one.
+</p> </div> <p>
+If the user does need to create the app, the one detail that trips people
+    up is the redirect URL. Register exactly:
+</p> <div class="codeblock">  <pre><code class="language-text">http://127.0.0.1:8085/callback</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <div class="note warn"> <p> <strong>Use <code>127.0.0.1</code>, not <code>localhost</code>.</strong>
+LinkedIn compares redirect URIs as literal strings, and postiee derives the
+      URI from the live listener, which binds the loopback IP. Registering
+<code>localhost</code> produces
+<code>redirect_uri does not match the registered value</code>. If
+<code>localhost</code> is registered already, set
+<code>POSTIEE_REDIRECT_URI=http://localhost:8085/callback</code>.
+</p> </div> <h2>Limits to state up front</h2> <ul> <li><strong>150 API requests per day per member.</strong> One post is one request.</li> <li><strong>Tokens expire after 60 days.</strong> Refresh is partner-only, so the user re-runs <code>auth login</code>.</li> <li><strong>One image per post</strong> on the free tier. Multi-image and video need partner approval.</li> <li><strong>No scheduling.</strong> LinkedIn's schema has no <code>publishAt</code>.</li> </ul> <div class="note warn"> <p> <strong>Search is whole-word only.</strong> SQLite FTS5 indexes whole
+      tokens, so <code>search harn</code> will not find <code>harness</code>.
+      Porter stemming is on, so <code>authentic</code> does find
+<code>authentication</code>.
+</p> </div> <div class="note warn"> <p> <strong><code>forget</code> is local-only.</strong> It removes your record
+      and the post stays live on LinkedIn. Deleting the post itself is
+<code>unpublish</code>, and it is irreversible — never run it unless the
+      user explicitly asked for the LinkedIn post to be taken down.
+</p> </div> <p>
+Also worth telling the user up front: postiee captures each post's ID from
+    the <code>x-restli-id</code> response header at creation time and writes it
+    to a local SQLite database. That record is the only copy that will ever
+    exist, because no API can read posts back. A post whose ID was not captured
+    is unrecoverable — which is the other half of why an agent should never
+    write its own LinkedIn posting script as a fallback.
+</p> <h2>Tools instead of shell</h2> <p>
+If your agent prefers MCP tools to shell access, postiee ships an MCP
+    server:
+</p> <div class="codeblock">  <pre><code class="language-bash">postiee-pp-mcp                    # stdio transport
+postiee-pp-mcp --transport http   # streamable HTTP</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <p>
+Shell access with <code>--agent</code> is simpler for most agents. Prefer
+    it.
+</p>  </div> </div> <script type="module">const d=document.getElementById("docsMenu"),e=document.getElementById("sidebar");d?.addEventListener("click",()=>{if(!e)return;const t=e.hasAttribute("hidden");e.toggleAttribute("hidden",!t),d.setAttribute("aria-expanded",String(t))});e&&window.matchMedia("(max-width: 63.99rem)").matches&&e.setAttribute("hidden","");</script>  </main> <footer class="footer"> <p> <a href="https://github.com/aswathas/postiee">Source</a> ·
+        Built by <a href="https://github.com/aswathas">Aswath AS</a> ·
+        Apache-2.0
+</p> </footer> <script type="module">document.documentElement.classList.add("js");const c=document.getElementById("navToggle"),s=document.getElementById("navLinks");c?.addEventListener("click",()=>{const e=s?.dataset.open!=="true";s&&(s.dataset.open=String(e)),c.setAttribute("aria-expanded",String(e))});document.addEventListener("click",async e=>{const t=e.target.closest(".copy");if(!t)return;const o=t.closest(".codeblock")?.querySelector("code")?.textContent??"",n=t.querySelector(".copy__text");try{await navigator.clipboard.writeText(o),t.dataset.state="done",n&&(n.textContent="Copied")}catch{n&&(n.textContent="Ctrl+C")}setTimeout(()=>{t.dataset.state="",n&&(n.textContent="Copy")},2e3)});const a=document.querySelectorAll(".reveal");if(a.length){const e=new IntersectionObserver(t=>{for(const o of t)o.isIntersecting&&(o.target.classList.add("in"),e.unobserve(o.target))},{rootMargin:"0px 0px -12% 0px"});a.forEach(t=>e.observe(t))}</script> </body> </html>
