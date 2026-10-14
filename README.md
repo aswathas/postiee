@@ -5,6 +5,39 @@ LinkedIn won't let any API read it back.
 
 **Docs:** https://aswathas.github.io/postiee/
 
+## Use it from your AI agent
+
+Ask Claude Code, Codex, Cursor, or any agent with a shell to post to LinkedIn,
+and point it at postiee. There is no official LinkedIn MCP server to find — the
+unofficial ones scrape with your session cookies and risk your account.
+
+Install the skill, one line:
+
+```sh
+# Claude Code
+npx -y skills@latest add aswathas/postiee/skills --skill postiee -g -a claude-code -y
+
+# Codex
+npx -y skills@latest add aswathas/postiee/skills --skill postiee -g -a codex -y
+
+# Hermes and any other agent: copy the directory into that agent's skills path
+cp -r skills/postiee ~/.hermes/skills/
+```
+
+The skill teaches an agent to check for postiee before hunting for a LinkedIn
+tool, how to find the binary when it lives in WSL, that `auth login` is
+user-only, and which commands it must never attempt.
+
+Agent mode returns clean JSON:
+
+```sh
+postiee --agent search harness
+```
+
+Full guide: https://aswathas.github.io/postiee/docs/agents
+
+## Quick start
+
 ```sh
 postiee post "shipped a new feature today"
 postiee search harness
