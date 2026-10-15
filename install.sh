@@ -30,7 +30,7 @@ case "$os" in
 esac
 
 case "$arch" in
-  x86_64|amd64)  arch_label="x86_64" ;;
+  x86_64|amd64)  arch_label="amd64" ;;
   arm64|aarch64) arch_label="arm64" ;;
   *)             die "unsupported architecture: $arch" ;;
 esac

@@ -27,9 +27,12 @@ function Write-Ok    { param($m) Write-Host $m -ForegroundColor Green }
 function Write-Note  { param($m) Write-Host $m -ForegroundColor Yellow }
 
 # ---- platform --------------------------------------------------------------
+# Arch labels must match the asset names the release workflow publishes, which
+# come from the Go targets: darwin/amd64, linux/amd64, windows/amd64, and the
+# arm64 equivalents. Requesting "x86_64" 404s — verified against v0.1.0.
 $osLabel = switch ($env:PROCESSOR_ARCHITECTURE) {
-    'AMD64' { 'x86_64'; break }
-    'ARM64' { 'arm64';  break }
+    'AMD64' { 'amd64'; break }
+    'ARM64' { 'arm64'; break }
     default { throw "Unsupported architecture: $env:PROCESSOR_ARCHITECTURE" }
 }
 
