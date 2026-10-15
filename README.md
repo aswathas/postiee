@@ -83,7 +83,12 @@ macOS x86_64/arm64 · Linux x86_64/arm64 · Windows x86_64/arm64
 1. <https://www.linkedin.com/developers/apps> → **Create app**
 2. **Products** tab → add **Share on LinkedIn** → grants `w_member_social`
 3. **Products** tab → add **Sign In with LinkedIn** → grants `openid`, `profile`
-4. **Auth** tab → add redirect URL: `http://localhost:8085/callback`
+4. **Auth** tab → add redirect URL: `http://127.0.0.1:8085/callback`
+   > **Use `127.0.0.1`, not `localhost`.** LinkedIn compares redirect URIs as
+   > literal strings, and `auth.go` derives the URI from the live listener, which
+   > binds the loopback IP. Registering `localhost` produces
+   > `redirect_uri does not match the registered value`. If you already registered
+   > `localhost`, set `POSTIEE_REDIRECT_URI=http://localhost:8085/callback`.
 5. Write `~/.config/postiee/credentials.toml`:
    ```toml
    client_id = "your_client_id"
