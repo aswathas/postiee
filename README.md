@@ -114,6 +114,7 @@ Tokens last 60 days. Programmatic refresh is partner-gated, so re-running
 | `postiee post "text"` | Post to your feed |
 | `postiee post --file post.md` | Long post without shell quoting |
 | `postiee post "text" --image p.jpg --alt "alt"` | Attach an image |
+| `postiee post "text" --image a.png --image b.png --image c.png` | Multi-image post — 2+ images as one post |
 | `postiee post "text" -v CONNECTIONS` | `PUBLIC`, `CONNECTIONS`, `LOGGED_IN` |
 | `postiee history` | Everything you've posted, newest first |
 | `postiee search <query>` | Full-text search your own posts |
@@ -283,3 +284,27 @@ the LinkedIn client, history layer, and credential handling are hand-written.
 
 Built by **Aswath AS** ([@aswathas](https://github.com/aswathas)) —
 [portfolio](https://hellokity.vercel.app/) · [blog](https://github.com/aswathas)
+## Multi-image posts
+
+Repeat `--image` to attach several images to a single post. LinkedIn renders
+these as one post with a swipeable set, not as separate posts.
+
+```bash
+postiee post "caption text" \
+  --image 1.png --image 2.png --image 3.png --image 4.png \
+  --alt "first image|second image|third image|fourth image"
+```
+
+**Alt text is pipe-separated**, one per image, in order. Fewer alts than
+images is fine; the rest are simply left blank. Use `|` rather than a comma
+because alt text is prose and often contains commas.
+
+One `--image` still sends a single-image post. Two or more switch the payload
+to LinkedIn's `multiImage` shape, which is a different field from the
+single-image `media` field. Both are organic; neither needs ad permissions.
+
+Not to be confused with the **Carousel** API, which is sponsored content only
+and requires different access. This is the organic multi-photo post.
+
+Maximum is whatever LinkedIn accepts for a multi-image post; upload failures
+name which image failed out of how many so a partial run is obvious.

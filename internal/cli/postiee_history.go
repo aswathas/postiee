@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -48,7 +49,8 @@ func historyStore() (*history.Store, error) {
 // posts back (`r_member_social` is closed), so whatever this writes to the
 // local database is the only durable record of the post.
 func newPostieePostCmd(flags *rootFlags) *cobra.Command {
-	var image, altText, visibility, file string
+	var images []string
+	var altText, visibility, file string
 
 	cmd := &cobra.Command{
 		Use:   "post <text>",
@@ -100,17 +102,36 @@ func newPostieePostCmd(flags *rootFlags) *cobra.Command {
 				Visibility: visibility,
 			}
 
+			// Images attach through the /rest/posts content field; the legacy
+			// UGC media array is not modelled. Upload first, then post exactly
+			// once — two CreatePost calls would publish two real posts.
+			//
+			// One image uses content.media. Two or more use content.multiImage,
+			// which is a different shape LinkedIn will not accept as media.
 			var mediaURN string
-			if image != "" {
-				mediaURN, err = c.UploadImage(ctx, image, altText)
+			switch len(images) {
+			case 0:
+			case 1:
+				mediaURN, err = c.UploadImage(ctx, images[0], altText)
 				if err != nil {
 					return err
 				}
-				// Images attach through the /rest/posts content field; the
-				// legacy UGC media array is not modelled. Upload first, then
-				// post exactly once — two CreatePost calls would publish two
-				// real posts.
 				req = withImage(req, mediaURN, altText)
+			default:
+				alts := splitAlts(altText)
+				urns := make([]string, 0, len(images))
+				for i, path := range images {
+					alt := ""
+					if i < len(alts) {
+						alt = alts[i]
+					}
+					urn, err := c.UploadImage(ctx, path, alt)
+					if err != nil {
+						return fmt.Errorf("uploading %s (image %d of %d): %w", filepath.Base(path), i+1, len(images), err)
+					}
+					urns = append(urns, urn)
+				}
+				req = postiee.WithMultiImage(req, urns, alts)
 			}
 
 			created, err := c.CreatePost(ctx, req)
@@ -140,19 +161,34 @@ func newPostieePostCmd(flags *rootFlags) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&image, "image", "", "path to an image to attach (jpg, png, gif)")
-	cmd.Flags().StringVar(&altText, "alt", "", "alt text for the image, under 120 characters is recommended")
+	cmd.Flags().StringSliceVar(&images, "image", nil,
+		"path to an image to attach (jpg, png, gif). Repeat for several: two or more images post as one multi-image post.")
+	cmd.Flags().StringVar(&altText, "alt", "",
+		"alt text for the image. With several images, one per image separated by a pipe |")
 	cmd.Flags().StringVarP(&visibility, "visibility", "v", "PUBLIC", "PUBLIC, CONNECTIONS, or LOGGED_IN")
 	cmd.Flags().StringVar(&file, "file", "", "read the post body from a file")
 	return cmd
 }
 
 func withImage(in postiee.CreatePostRequest, urn, alt string) postiee.CreatePostRequest {
-	content := &postiee.PostContent{}
-	content.Media.ID = urn
-	content.Media.AltText = alt
-	in.Content = content
+	in.Content = &postiee.PostContent{
+		Media: &postiee.PostMedia{ID: urn, AltText: alt},
+	}
 	return in
+}
+
+// splitAlts separates per-image alt text. A pipe is the delimiter because alt
+// text is prose and rarely contains one; commas would split a sentence.
+func splitAlts(alt string) []string {
+	if strings.TrimSpace(alt) == "" {
+		return nil
+	}
+	parts := strings.Split(alt, "|")
+	out := make([]string, len(parts))
+	for i, p := range parts {
+		out[i] = strings.TrimSpace(p)
+	}
+	return out
 }
 
 func orDefault(v, d string) string {

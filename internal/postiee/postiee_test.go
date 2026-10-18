@@ -112,9 +112,10 @@ func TestCreatePostOmitsContentForTextOnly(t *testing.T) {
 
 func TestCreatePostIncludesAltTextWhenProvided(t *testing.T) {
 	in := CreatePostRequest{Author: "urn:li:person:a", Commentary: "hi"}
-	in.Content = &PostContent{}
-	in.Content.Media.ID = "urn:li:image:xyz"
-	in.Content.Media.AltText = "a bar chart"
+	in.Content = &PostContent{Media: &PostMedia{
+		ID:      "urn:li:image:xyz",
+		AltText: "a bar chart",
+	}}
 
 	raw := captureBody(t, in)
 	if !strings.Contains(raw, `"altText":"a bar chart"`) {
@@ -282,4 +283,60 @@ func writeTempPNG(t *testing.T) string {
 		t.Fatal(err)
 	}
 	return f
+}
+// A multi-image post is a different JSON shape from a single image. LinkedIn
+// rejects an array under content.media, so getting this wrong fails the post.
+func TestWithMultiImageEmitsMultiImageShape(t *testing.T) {
+	in := CreatePostRequest{Author: "urn:li:person:a", Commentary: "hi"}
+	in = WithMultiImage(in, []string{"urn:li:image:1", "urn:li:image:2"}, []string{"first", "second"})
+
+	raw := captureBody(t, in)
+	if !strings.Contains(raw, `"multiImage"`) {
+		t.Fatalf("expected content.multiImage, got: %s", raw)
+	}
+	if strings.Contains(raw, `"media"`) {
+		t.Fatalf("multi-image post must not also send content.media: %s", raw)
+	}
+	for _, want := range []string{`"id":"urn:li:image:1"`, `"id":"urn:li:image:2"`} {
+		if !strings.Contains(raw, want) {
+			t.Fatalf("missing %s in body: %s", want, raw)
+		}
+	}
+}
+
+// Alt text is per image, not one string for the set.
+func TestWithMultiImageKeepsAltTextPerImage(t *testing.T) {
+	in := CreatePostRequest{Author: "urn:li:person:a", Commentary: "hi"}
+	in = WithMultiImage(in, []string{"urn:li:image:1", "urn:li:image:2"}, []string{"alpha", "beta"})
+
+	raw := captureBody(t, in)
+	if !strings.Contains(raw, `"altText":"alpha"`) || !strings.Contains(raw, `"altText":"beta"`) {
+		t.Fatalf("per-image alt text missing: %s", raw)
+	}
+}
+
+// Fewer alt strings than images must not panic or shift values onto the wrong
+// image.
+func TestWithMultiImageToleratesMissingAlts(t *testing.T) {
+	in := CreatePostRequest{Author: "urn:li:person:a", Commentary: "hi"}
+	in = WithMultiImage(in, []string{"urn:li:image:1", "urn:li:image:2"}, []string{"only one"})
+
+	raw := captureBody(t, in)
+	if !strings.Contains(raw, `"altText":"only one"`) {
+		t.Fatalf("first image alt missing: %s", raw)
+	}
+	if strings.Count(raw, `"id":"urn:li:image`) != 2 {
+		t.Fatalf("expected both images: %s", raw)
+	}
+}
+
+// A single image must keep using content.media, not the multiImage shape.
+func TestWithMultiImageEmptyDoesNotAttachContent(t *testing.T) {
+	in := CreatePostRequest{Author: "urn:li:person:a", Commentary: "hi"}
+	in = WithMultiImage(in, nil, nil)
+
+	raw := captureBody(t, in)
+	if strings.Contains(raw, `"content"`) {
+		t.Fatalf("zero images must omit content entirely: %s", raw)
+	}
 }

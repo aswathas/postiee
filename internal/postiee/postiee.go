@@ -117,11 +117,56 @@ type CreatePostRequest struct {
 
 // PostContent carries the attached media. AltText is optional but strongly
 // recommended: LinkedIn caps it at 4,086 characters and suggests under 120.
+//
+// LinkedIn exposes two distinct organic shapes and they are not interchangeable:
+//
+//	Media    single image, video, or document  → content.media
+//	MultiImage  2+ images as one post        → content.multiImage
+//
+// Sending an array under content.media is rejected. The "carousel" that the
+// app calls a multi-photo post is the MultiImage shape; the ad-only Carousel
+// API is a different product with different permissions.
 type PostContent struct {
-	Media struct {
-		ID      string `json:"id"`
-		AltText string `json:"altText,omitempty"`
-	} `json:"media"`
+	Media      *PostMedia       `json:"media,omitempty"`
+	MultiImage *MultiImageBlock `json:"multiImage,omitempty"`
+}
+
+// PostMedia is the single-attachment shape.
+type PostMedia struct {
+	ID      string `json:"id"`
+	AltText string `json:"altText,omitempty"`
+}
+
+// MultiImageBlock is the 2+ image organic shape.
+type MultiImageBlock struct {
+	Images []MultiImageItem `json:"images"`
+}
+
+// MultiImageItem is one image inside a multiImage post. AltText is per image.
+type MultiImageItem struct {
+	ID      string `json:"id"`
+	AltText string `json:"altText,omitempty"`
+}
+
+// WithMultiImage attaches several images as one post.
+//
+// Zero images is a no-op rather than an empty multiImage block: LinkedIn
+// treats an empty content object differently from omitting it, and a
+// text-only post must omit content entirely.
+func WithMultiImage(in CreatePostRequest, urns []string, alts []string) CreatePostRequest {
+	if len(urns) == 0 {
+		return in
+	}
+	block := &MultiImageBlock{Images: make([]MultiImageItem, 0, len(urns))}
+	for i, urn := range urns {
+		item := MultiImageItem{ID: urn}
+		if i < len(alts) {
+			item.AltText = alts[i]
+		}
+		block.Images = append(block.Images, item)
+	}
+	in.Content = &PostContent{MultiImage: block}
+	return in
 }
 
 // CreatedPost is the result of a successful create.
