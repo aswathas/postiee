@@ -11,13 +11,25 @@ Seven commands do the real work. Everything else exists because the
 </p> </div> <h2>post</h2> <div class="codeblock">  <pre><code class="language-bash">postiee post &quot;some text&quot;
 postiee post --file post.md
 postiee post &quot;with a picture&quot; --image chart.png --alt &quot;a line chart&quot;
-postiee post &quot;connections only&quot; -v CONNECTIONS</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <div class="table-scroll"> <table> <thead> <tr><th scope="col">Flag</th><th scope="col">Meaning</th></tr> </thead> <tbody> <tr><td><code>--file</code></td><td>Read the body from a file. Avoids shell quoting entirely.</td></tr> <tr><td><code>--image</code></td><td>Attach one image. JPG, PNG, or GIF. One, not many — see the note below.</td></tr> <tr><td><code>--alt</code></td><td>Alt text for that image.</td></tr> <tr><td><code>-v</code>, <code>--visibility</code></td><td><code>PUBLIC</code>, <code>CONNECTIONS</code>, or <code>LOGGED_IN</code>. Defaults to <code>PUBLIC</code>.</td></tr> </tbody> </table> </div> <div class="note"> <p>
+postiee post &quot;connections only&quot; -v CONNECTIONS</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <div class="table-scroll"> <table> <thead> <tr><th scope="col">Flag</th><th scope="col">Meaning</th></tr> </thead> <tbody> <tr><td><code>--file</code></td><td>Read the body from a file. Avoids shell quoting entirely.</td></tr> <tr><td><code>--image</code></td><td>Attach an image. JPG, PNG, or GIF. Repeat the flag to send a multi-photo post (v0.2.0+).</td></tr> <tr><td><code>--alt</code></td><td>Alt text for that image.</td></tr> <tr><td><code>-v</code>, <code>--visibility</code></td><td><code>PUBLIC</code>, <code>CONNECTIONS</code>, or <code>LOGGED_IN</code>. Defaults to <code>PUBLIC</code>.</td></tr> </tbody> </table> </div> <div class="note"> <p>
 Prefer <code>--file</code> for anything long. Quoting a multi-line post
       through a shell is how you end up with mangled apostrophes.
-</p> </div> <div class="note warn"> <p> <strong>One image only.</strong> <code>--image</code> takes a single file,
-      and that is the whole of what a self-serve app can attach. Multi-image
-      posts and video both need LinkedIn partner approval, so there is no flag
-      for them. See <a href="/postiee/docs/limits">Limits and scope</a>.
+</p> </div> <h2 id="multi-image-posts">Multi-image posts <span style="font-size:.65em;vertical-align:middle;color:var(--accent,#c0392b);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);padding:1px 6px;border-radius:6px;margin-left:.4em">v0.2.0</span></h2> <p>
+<code>--image</code> is repeatable. With one image the post is sent as a
+    single-attachment <code>content.media</code> shape. With two or more
+    images LinkedIn accepts the <code>content.multiImage</code> shape and the
+    post renders in the feed as a multi-photo carousel. Per-image alt text is
+    pipe-separated, one value per image in positional order. The first image
+    is the carousel&rsquo;s cover. LinkedIn&rsquo;s ad-only Carousel API is a
+    different product and not what this flag does.
+</p> <div class="codeblock">  <pre><code class="language-bash">postiee post \
+  --image first.jpg --image second.jpg --image third.jpg \
+  --alt "the team receiving the certificate|the auditorium crowd|the winning poster" \
+  "Won the project expo this weekend. Three days, one build, a roomful of new contacts."</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <div class="note"> <p>
+Two-image posts already count as multi-photo. Alt text for an image is
+      optional: passing fewer alts than images leaves the unmatched entries
+      empty, which LinkedIn accepts. The original <code>post --image one.png
+      --alt "..."</code> shape is unchanged &mdash; one flag, single-image post.
 </p> </div> <h2>history</h2> <div class="codeblock">  <pre><code class="language-bash">postiee history
 postiee history --limit 200</code></pre> <button class="copy" type="button"> <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"> <rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.7"></rect> <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path> </svg> <span class="copy__text">Copy</span> <span class="sr-only">Copy code to clipboard</span> </button> </div> <p>
 Reads only the local database. No network call, no rate-limit cost.
